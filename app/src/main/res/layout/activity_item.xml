@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+android:id="@+id/drawerlayout"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:fitsSystemWindows="true">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:visibility="visible"
+        android:layout_height="60dp"
+        android:layout_width="match_parent"
+        android:background="#ffffff">
+
+        <ImageButton
+            android:id="@+id/hamburger_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_action_name" />
+
+        <EditText
+            android:id="@+id/barTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#ffffff" />
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <TextView
+        android:id="@+id/itemDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:textSize="18dp"
+        android:gravity="center">
+    </TextView>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="5dp">
+        <EditText android:id="@+id/scopRezervare"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapWords"
+            android:hint="Scop rezervare" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:fillViewport="true">
+        <com.squareup.timessquare.CalendarPickerView
+            android:id="@+id/calendar_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+    </ScrollView>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_rezerva"
+        android:layout_width="fill_parent"
+        android:layout_height="82dp"
+        android:layout_marginTop="10dp"
+        android:text="Rezerva" />
+
+</LinearLayout>
+
+
+<com.google.android.material.navigation.NavigationView
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:layout_gravity="start"
+    android:id="@+id/nav_view"
+    app:headerLayout="@layout/drawer_header"
+    app:menu="@menu/menu_nav"/>
+
+</androidx.drawerlayout.widget.DrawerLayout>
