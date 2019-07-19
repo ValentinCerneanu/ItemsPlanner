@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.itemsplanner.R;
+import com.example.itemsplanner.models.Category;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -40,10 +41,10 @@ public class MainActivity extends AppCompatActivity {
     ImageButton burgerBtn;
 
     FirebaseDatabase database;
-    DatabaseReference myRefToDababase;
+    DatabaseReference myRefToDatabase;
 
-    ArrayList<String> listItems=new ArrayList<String>();
-    ArrayAdapter<String> adapter;
+    ArrayList<Category> categoriesList = new ArrayList<Category>();
+    ArrayAdapter<Category> adapter;
 
     JSONObject categories = null;
 
@@ -59,13 +60,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setupToolbarAndDrawer();
 
-        adapter=new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listItems);
+        adapter = new ArrayAdapter<Category>(this, android.R.layout.simple_list_item_1, categoriesList);
         final ListView list = (ListView) findViewById(R.id.list);
         list.setAdapter(adapter);
 
         database = FirebaseDatabase.getInstance();
-        myRefToDababase = database.getReference("Categories");
-        myRefToDababase.addValueEventListener(new ValueEventListener() {
+        myRefToDatabase = database.getReference("Categories");
+        myRefToDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()){
@@ -79,12 +80,12 @@ public class MainActivity extends AppCompatActivity {
                             String key = iterator.next();
                             try {
                                 JSONObject category = new JSONObject(categories.get(key).toString());
-                                adapter.add(category.get("name").toString());
-                                adapter.notifyDataSetChanged();
+                                categoriesList.add(new Category(key, category.get("name").toString()));
                             } catch (JSONException e) {
                                 // Something went wrong!
                             }
                         }
+                        adapter.notifyDataSetChanged();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -103,21 +104,21 @@ public class MainActivity extends AppCompatActivity {
                 Intent nextActivity;
                 nextActivity = new Intent(getBaseContext(), ItemsActivity.class);
 
-                TextView textView = (TextView) arg1;
-                String selectedCategory = textView.getText().toString();
+                Category selectedCategory = (Category) arg0.getItemAtPosition(position);
                 Iterator<String> iterator = categories.keys();
                 while (iterator.hasNext()) {
                     String key = iterator.next();
-                    try {
-                        JSONObject category = new JSONObject(categories.get(key).toString());
-                        if(category.get("name").toString().equals(selectedCategory)){
+                    if(key.equals(selectedCategory.getId())){
+                        try {
+                            JSONObject category = new JSONObject(categories.get(key).toString());
                             nextActivity.putExtra("ITEMS_LIST", category.get("items").toString());
                             break;
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
-                    } catch (JSONException e) {
                     }
                 }
-                nextActivity.putExtra("CATEGORY_NAME", selectedCategory);
+                nextActivity.putExtra("CATEGORY_NAME", selectedCategory.getName());
                 startActivity(nextActivity);
             }
         });

@@ -11,6 +11,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -18,14 +19,24 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.example.itemsplanner.R;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
 import com.squareup.timessquare.CalendarPickerView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 
 import static com.squareup.timessquare.CalendarPickerView.SelectionMode.RANGE;
 
@@ -34,12 +45,18 @@ public class ItemActivity extends AppCompatActivity {
     NavigationView navigationView;
     TextView titleTextView;
     ImageButton burgerBtn;
-    JSONObject item = null;
     CalendarPickerView calendar;
     AppCompatButton butonRezerva;
     EditText scopRezervare;
 
     ArrayList<Date> intervalSelectat = new ArrayList<>();
+    ArrayList<String> bookingsDetails = new ArrayList<>();
+
+    FirebaseDatabase database;
+    DatabaseReference myRefToDatabase;
+
+    JSONObject item = null;
+    JSONObject bookings = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +82,7 @@ public class ItemActivity extends AppCompatActivity {
         }
 
         setupCalendar();
+        getAllBookingsDetails();
 
         scopRezervare = findViewById(R.id.scopRezervare);
 
@@ -90,9 +108,69 @@ public class ItemActivity extends AppCompatActivity {
                     focusView.requestFocus();
                 } else{
                     intervalSelectat = new ArrayList<Date>(calendar.getSelectedDates());
+                    checkAvailability();
                 }
             }
         });
+    }
+
+    public boolean checkAvailability(){
+        for(String bookingDetails: bookingsDetails){
+            try {
+                JSONObject details = new JSONObject(bookingDetails);
+                JSONObject interval = details.getJSONObject("interval");
+                DateFormat dateFormat = new SimpleDateFormat("dd/mm/yyyy");
+                Date from = dateFormat.parse(interval.getString("from"));
+                Date till = dateFormat.parse(interval.getString("till"));
+                if(intervalSelectat.size() == 1){
+                    if(till.after(intervalSelectat.get(0))){
+                        return false;
+                    }
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
+    }
+
+    public void getAllBookingsDetails(){
+        try {
+            final JSONObject itemBookings = item.getJSONObject("bookings");
+
+            database = FirebaseDatabase.getInstance();
+            myRefToDatabase = database.getReference("Bookings");
+            myRefToDatabase.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()){
+                        Gson gson = new Gson();
+                        String gsonString = gson.toJson(dataSnapshot.getValue());
+
+                        try {
+                            bookings = new JSONObject(gsonString);
+                            Iterator<String> iterator = itemBookings.keys();
+                            while(iterator.hasNext()){
+                                String key = iterator.next();
+                                bookingsDetails.add(bookings.getJSONObject(key).toString());
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                }
+            });
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private void setupCalendar(){

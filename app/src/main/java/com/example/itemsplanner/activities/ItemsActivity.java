@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.itemsplanner.R;
+import com.example.itemsplanner.models.Item;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -30,8 +31,8 @@ public class ItemsActivity extends AppCompatActivity {
     TextView titleTextView;
     ImageButton burgerBtn;
 
-    ArrayList<String> listItems = new ArrayList<String>();
-    ArrayAdapter<String> adapter;
+    ArrayList<Item> itemsList = new ArrayList<Item>();
+    ArrayAdapter<Item> adapter;
     JSONObject items = null;
 
     @Override
@@ -40,7 +41,7 @@ public class ItemsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setupToolbarAndDrawer();
 
-        adapter=new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listItems);
+        adapter=new ArrayAdapter<Item>(this, android.R.layout.simple_list_item_1, itemsList);
         final ListView list = (ListView) findViewById(R.id.list);
         list.setAdapter(adapter);
 
@@ -49,53 +50,47 @@ public class ItemsActivity extends AppCompatActivity {
             try {
                 items = new JSONObject(itemsString);
                 Iterator<String> iterator = items.keys();
-                if (items.length() == 0) {
-                    adapter.add("No items");
-                    adapter.notifyDataSetChanged();
-                } else {
-                    while (iterator.hasNext()) {
-                        String key = iterator.next();
-                        try {
-                            JSONObject category = new JSONObject(items.get(key).toString());
-                            adapter.add(category.get("name").toString());
-                            adapter.notifyDataSetChanged();
-                        } catch (JSONException e) {
-                            // Something went wrong!
-                        }
+                while (iterator.hasNext()) {
+                    String key = iterator.next();
+                    try {
+                        JSONObject item = new JSONObject(items.get(key).toString());
+                        itemsList.add(new Item(key, item.get("name").toString(), item.get("image_url").toString(),
+                                item.get("descriere").toString()));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
                 }
-                list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-                    @Override
-                    public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
-                        Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), ItemActivity.class);
-
-                        TextView textView = (TextView) arg1;
-                        String selectedItem = textView.getText().toString();
-                        Iterator<String> iterator = items.keys();
-                        while (iterator.hasNext()) {
-                            String key = iterator.next();
-                            try {
-                                JSONObject item = new JSONObject(items.get(key).toString());
-                                if(item.get("name").toString().equals(selectedItem)){
-                                    nextActivity.putExtra("ITEM", item.toString());
-                                    break;
-                                }
-                            } catch (JSONException e) {
-                            }
-                        }
-                        nextActivity.putExtra("ITEM_NAME", selectedItem);
-                        startActivity(nextActivity);
-                    }
-                });
+                adapter.notifyDataSetChanged();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        } else{
-            adapter.add("No items");
-            adapter.notifyDataSetChanged();
         }
+
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+                Intent nextActivity;
+                nextActivity = new Intent(getBaseContext(), ItemActivity.class);
+
+                Item selectedItem = (Item) arg0.getItemAtPosition(position);
+                Iterator<String> iterator = items.keys();
+                while (iterator.hasNext()) {
+                    String key = iterator.next();
+                    if(key.equals(selectedItem.getId())){
+                        try {
+                            JSONObject item = new JSONObject(items.get(key).toString());
+                            nextActivity.putExtra("ITEM", item.toString());
+                            break;
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                nextActivity.putExtra("ITEM_NAME", selectedItem.getName());
+                startActivity(nextActivity);
+            }
+        });
     }
 
     private void setupToolbarAndDrawer(){
