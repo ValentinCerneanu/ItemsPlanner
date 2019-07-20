@@ -1,6 +1,7 @@
 package com.example.itemsplanner.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.MenuItem;
@@ -101,7 +102,8 @@ public class ItemsActivity extends AppCompatActivity {
 
         View headerLayout = navigationView.getHeaderView(0);
         TextView userEditText = (TextView) headerLayout.findViewById(R.id.user);
-        String userName = "";
+        SharedPreferences sharedPreferences = getSharedPreferences("FirebaseUser", MODE_PRIVATE);
+        String userName = sharedPreferences.getString("name", "");
         if (userName != null) {
             userEditText.setText("Hello, " + userName +"!");
         }

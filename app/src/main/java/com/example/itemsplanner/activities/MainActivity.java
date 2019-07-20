@@ -1,6 +1,7 @@
 package com.example.itemsplanner.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.Menu;
@@ -18,8 +19,10 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.itemsplanner.R;
 import com.example.itemsplanner.models.Category;
+import com.example.itemsplanner.models.User;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -58,7 +61,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setupToolbarAndDrawer();
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = mAuth.getCurrentUser();
+        getDataForUser(user);
+
+
 
         adapter = new ArrayAdapter<Category>(this, android.R.layout.simple_list_item_1, categoriesList);
         final ListView list = (ListView) findViewById(R.id.list);
@@ -124,6 +131,42 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void getDataForUser(final FirebaseUser firebaseUser){
+        database = FirebaseDatabase.getInstance();
+        myRefToDatabase = database.getReference("Users").child(firebaseUser.getUid());
+
+        myRefToDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    User user = null;
+                    Gson gson = new Gson();
+                    String gsonString = gson.toJson(dataSnapshot.getValue());
+                    try {
+                        JSONObject userJson = new JSONObject(gsonString);
+                        user = new User(userJson.getString("name"), userJson.getString("phoneNumber"));
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    SharedPreferences sharedPreferences = getSharedPreferences("FirebaseUser", MODE_PRIVATE);
+                    SharedPreferences.Editor ed = sharedPreferences.edit();
+                    ed.putString("id", firebaseUser.getUid());
+                    ed.putString("name", user.getName());
+                    ed.putString("email", firebaseUser.getEmail());
+                    ed.putString("phoneNumber",  user.getPhoneNumber());
+                    ed.commit();
+                    setupToolbarAndDrawer();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     private void setupToolbarAndDrawer(){
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.bringToFront();
@@ -132,7 +175,8 @@ public class MainActivity extends AppCompatActivity {
 
         View headerLayout = navigationView.getHeaderView(0);
         TextView userEditText = (TextView) headerLayout.findViewById(R.id.user);
-        String userName = "";
+        SharedPreferences sharedPreferences = getSharedPreferences("FirebaseUser", MODE_PRIVATE);
+        String userName = sharedPreferences.getString("name", "");
         if (userName != null) {
             userEditText.setText("Hello, " + userName +"!");
         }
@@ -142,8 +186,10 @@ public class MainActivity extends AppCompatActivity {
             // This method will trigger on item Click of navigation menu
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
-                if (menuItem.isChecked()) menuItem.setChecked(false);
-                else menuItem.setChecked(true);
+                if (menuItem.isChecked())
+                    menuItem.setChecked(false);
+                else
+                    menuItem.setChecked(true);
                 //Closing drawer on item click
                 drawerLayout.closeDrawers();
                 switch (menuItem.getItemId()) {

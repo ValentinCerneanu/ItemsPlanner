@@ -1,11 +1,15 @@
 package com.example.itemsplanner.activities;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -17,6 +21,10 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.itemsplanner.R;
+import com.example.itemsplanner.models.Booking;
+import com.example.itemsplanner.models.Interval;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -108,10 +116,52 @@ public class ItemActivity extends AppCompatActivity {
                     focusView.requestFocus();
                 } else{
                     intervalSelectat = new ArrayList<Date>(calendar.getSelectedDates());
-                    checkAvailability();
+                    if(checkAvailability()){
+                        Date from = intervalSelectat.get(0);
+                        Date till = intervalSelectat.get(intervalSelectat.size() - 1);
+                        Booking booking = new Booking (scopRezervare.getText().toString(), getUserId());
+                        Interval interval = new Interval(from, till);
+                        writeNewBooking(booking, interval);
+                    }
                 }
             }
         });
+    }
+
+    public String getUserId(){
+        SharedPreferences sharedPreferences = getSharedPreferences("FirebaseUser", MODE_PRIVATE);
+        return sharedPreferences.getString("id", null);
+    }
+
+    public void writeNewBooking(Booking booking, Interval interval){
+        database = FirebaseDatabase.getInstance();
+        myRefToDatabase = database.getReference("Bookings");
+        myRefToDatabase.child("B4").setValue(booking)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        System.out.println("s");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        System.out.println("f");
+                    }
+                });
+        myRefToDatabase.child("B4").child("interval").setValue(interval)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        System.out.println("s");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        System.out.println("f");
+                    }
+                });
     }
 
     public boolean checkAvailability(){
@@ -126,8 +176,11 @@ public class ItemActivity extends AppCompatActivity {
                     if(till.after(intervalSelectat.get(0))){
                         return false;
                     }
-                }
+                } else {
+                    if(till.after(intervalSelectat.get(0))){
 
+                    }
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             } catch (ParseException e) {
@@ -182,6 +235,32 @@ public class ItemActivity extends AppCompatActivity {
         calendar.init(today, nextYear.getTime())
                 .withSelectedDate(today);
         calendar.init(today, nextYear.getTime()).inMode(RANGE);
+
+        calendar.setOnDateSelectedListener(new CalendarPickerView.OnDateSelectedListener() {
+            @Override
+            public void onDateSelected(Date date) {
+                Context context = getApplicationContext();
+                hideKeyboardFrom(context, calendar);
+            }
+
+            @Override
+            public void onDateUnselected(Date date) {
+                Context context = getApplicationContext();
+                hideKeyboardFrom(context, calendar);
+            }
+        });
+        calendar.setOnInvalidDateSelectedListener(new CalendarPickerView.OnInvalidDateSelectedListener() {
+            @Override
+            public void onInvalidDateSelected(Date date) {
+                Context context = getApplicationContext();
+                hideKeyboardFrom(context, calendar);
+            }
+        });
+    }
+
+    public void hideKeyboardFrom(Context context, View view) {
+        InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     private void setupToolbarAndDrawer(){
@@ -192,7 +271,8 @@ public class ItemActivity extends AppCompatActivity {
 
         View headerLayout = navigationView.getHeaderView(0);
         TextView userEditText = (TextView) headerLayout.findViewById(R.id.user);
-        String userName = "";
+        SharedPreferences sharedPreferences = getSharedPreferences("FirebaseUser", MODE_PRIVATE);
+        String userName = sharedPreferences.getString("name", "");
         if (userName != null) {
             userEditText.setText("Hello, " + userName +"!");
         }

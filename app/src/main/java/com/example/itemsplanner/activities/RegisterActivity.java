@@ -1,6 +1,7 @@
 package com.example.itemsplanner.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -12,11 +13,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.itemsplanner.R;
+import com.example.itemsplanner.models.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.json.JSONException;
 
@@ -30,6 +34,9 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText mPhone;
     private EditText mPassword;
     private EditText mConfirmPassword;
+
+    private FirebaseDatabase database;
+    private DatabaseReference myRefToDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +57,8 @@ public class RegisterActivity extends AppCompatActivity {
         String phone = mPhone.getText().toString();
         String password = mPassword.getText().toString();
         String passwordConfirmed = mConfirmPassword.getText().toString();
+
+        final User user = new User(name, phone);
 
         View focusView = null;
         boolean cancel = false;
@@ -97,12 +106,13 @@ public class RegisterActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
                                 // Sign in success, update UI with the signed-in user's information
-                                FirebaseUser user = mAuth.getCurrentUser();
+                                FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                                writeToUsersTable(firebaseUser, user);
                                 Intent nextActivity;
                                 nextActivity = new Intent(getBaseContext(), MainActivity.class);
                                 startActivity(nextActivity);
                                 finish();
-                                user.sendEmailVerification()
+                                firebaseUser.sendEmailVerification()
                                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
@@ -122,13 +132,24 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
+    private void writeToUsersTable(final FirebaseUser firebaseUser, final User user){
+        database = FirebaseDatabase.getInstance();
+        myRefToDatabase = database.getReference("Users");
+        myRefToDatabase.child(firebaseUser.getUid()).setValue(user);
+        SharedPreferences sharedPreferences = getSharedPreferences("FirebaseUser", MODE_PRIVATE);
+        SharedPreferences.Editor ed = sharedPreferences.edit();
+        ed.putString("id", firebaseUser.getUid());
+        ed.putString("name", user.getName());
+        ed.putString("email", firebaseUser.getEmail());
+        ed.putString("phoneNumber",  user.getPhoneNumber());
+        ed.commit();
+    }
+
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
         return email.contains("@");
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
         return password.length() > 4;
     }
 

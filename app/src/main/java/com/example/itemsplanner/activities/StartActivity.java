@@ -1,6 +1,8 @@
 package com.example.itemsplanner.activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,6 +29,7 @@ public class StartActivity extends AppCompatActivity {
                 Intent nextActivity;
                 if (user != null) {
                     // User is signed in
+                    saveDateToSharedPreferences(user);
                     nextActivity = new Intent(getBaseContext(), MainActivity.class);
                     startActivity(nextActivity);
                 } else {
@@ -37,5 +40,15 @@ public class StartActivity extends AppCompatActivity {
                 finish();
             }
         }.start();
+    }
+
+    private void saveDateToSharedPreferences(FirebaseUser user){
+        SharedPreferences sharedPreferences = getSharedPreferences("FirebaseUser", MODE_PRIVATE);
+        SharedPreferences.Editor ed = sharedPreferences.edit();
+        ed.putString("id", user.getUid());
+        ed.putString("name", user.getDisplayName());
+        ed.putString("email", user.getEmail());
+        ed.putString("phoneNumber",  user.getPhoneNumber());
+        ed.commit();
     }
 }
