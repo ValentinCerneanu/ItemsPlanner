@@ -136,30 +136,30 @@ public class ItemActivity extends AppCompatActivity {
     public void writeNewBooking(Booking booking, Interval interval){
         database = FirebaseDatabase.getInstance();
         myRefToDatabase = database.getReference("Bookings");
-        myRefToDatabase.child("B4").setValue(booking)
+        myRefToDatabase = myRefToDatabase.push();
+        String generatedId = myRefToDatabase.getKey();
+        myRefToDatabase = database.getReference("Bookings");
+        myRefToDatabase.child(generatedId).setValue(booking)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        System.out.println("s");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        System.out.println("f");
                     }
                 });
-        myRefToDatabase.child("B4").child("interval").setValue(interval)
+
+        myRefToDatabase.child(generatedId).child("interval").setValue(interval)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        System.out.println("s");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        System.out.println("f");
                     }
                 });
     }
