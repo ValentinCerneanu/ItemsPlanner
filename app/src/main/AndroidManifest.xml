@@ -29,7 +29,8 @@
         </activity>
         <activity android:name=".activities.ItemActivity">
         </activity>
-
+        <activity android:name=".activities.MyItemsReservations">
+        </activity>
 
     </application>
 

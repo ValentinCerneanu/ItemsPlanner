@@ -1,5 +1,7 @@
 package com.example.itemsplanner.models;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Interval{
@@ -7,8 +9,9 @@ public class Interval{
     private String till;
 
     public Interval(Date from, Date till) {
-        this.from = from.toString();
-        this.till = till.toString();
+        DateFormat dateFormat = new SimpleDateFormat("yyyy MM dd");
+        this.from = dateFormat.format(from);
+        this.till = dateFormat.format(till);
     }
 
     public String getFrom() {

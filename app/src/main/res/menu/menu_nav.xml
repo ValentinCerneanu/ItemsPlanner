@@ -3,7 +3,7 @@
         <menu>
 
             <item
-                android:id="@+id/nav_parking_spaces"
+                android:id="@+id/nav_my_items_reservations"
                 android:icon="@drawable/ic_launcher_background"
                 android:title="My Items Reservations" />
         </menu>

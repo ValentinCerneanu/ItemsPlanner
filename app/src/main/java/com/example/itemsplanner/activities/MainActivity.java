@@ -119,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             JSONObject category = new JSONObject(categories.get(key).toString());
                             nextActivity.putExtra("ITEMS_LIST", category.get("items").toString());
+                            nextActivity.putExtra("CATEGORY_ID", key);
                             break;
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -193,6 +194,12 @@ public class MainActivity extends AppCompatActivity {
                 //Closing drawer on item click
                 drawerLayout.closeDrawers();
                 switch (menuItem.getItemId()) {
+                    case R.id.nav_my_items_reservations: {
+                        Intent nextActivity;
+                        nextActivity = new Intent(getBaseContext(), MyItemsReservations.class);
+                        startActivity(nextActivity);
+                        break;
+                    }
 
                     case R.id.nav_logout: {
                         FirebaseAuth.getInstance().signOut();
