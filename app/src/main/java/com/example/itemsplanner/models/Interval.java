@@ -1,7 +1,9 @@
 package com.example.itemsplanner.models;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class Interval{
@@ -32,9 +34,31 @@ public class Interval{
 
     @Override
     public String toString() {
-        return "Interval{" +
-                "from=" + from +
-                ", till=" + till +
-                '}';
+        DateFormat dateFormat = new SimpleDateFormat("yyyy MM dd");
+        try {
+            Date fromFormated = dateFormat.parse(from);
+            Date tillFormated = dateFormat.parse(till);
+            String fromStringFormated = buildOutputDate(fromFormated);
+            String tillStringFormated = buildOutputDate(tillFormated);
+            if(from.equals(till)) {
+                return "Data: " + fromStringFormated;
+            }
+
+            return "Interval: "
+                    + fromStringFormated + " - "
+                    + tillStringFormated;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    private String buildOutputDate(Date date){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH) + 1;
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        return day + " " + month + " " + year;
     }
 }

@@ -77,7 +77,7 @@ public class ItemActivity extends AppCompatActivity {
         final TextView itemDescriptionTextView = (TextView)findViewById(R.id.itemDescription);
 
         String categoryId = getIntent().getStringExtra("CATEGORY_ID");
-        String itemId = getIntent().getStringExtra("ITEM_ID");
+        final String itemId = getIntent().getStringExtra("ITEM_ID");
         database = FirebaseDatabase.getInstance();
         myRefToDatabase = database.getReference("Categories").child(categoryId).child("items").child(itemId);
         myRefToDatabase.addValueEventListener(new ValueEventListener() {
@@ -136,7 +136,8 @@ public class ItemActivity extends AppCompatActivity {
                     if(conflictBooking == null){
                         Date from = intervalSelectat.get(0);
                         Date till = intervalSelectat.get(intervalSelectat.size() - 1);
-                        Booking booking = new Booking (scopRezervare.getText().toString(), getUserId());
+                        Booking booking = null;
+                        booking = new Booking(scopRezervare.getText().toString(), getUserId(), (String) getIntent().getStringExtra("ITEM_NAME"), itemId);
                         Interval interval = new Interval(from, till);
                         writeNewBooking(booking, interval);
                     } else {
@@ -198,6 +199,13 @@ public class ItemActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder((Context)ItemActivity.this);
+                        builder.setTitle("Rezervare efectuata");
+                        builder.setMessage("Itemul a fost rezervat cu succes!\n"
+                                            + "Puteti vedea toate rezervarile in meniul \"Rezervarile mele\"");
+                        builder.setPositiveButton("OK", null);
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -221,6 +229,9 @@ public class ItemActivity extends AppCompatActivity {
         String itemId = getIntent().getStringExtra("ITEM_ID");
         myRefToDatabase = database.getReference("Categories");
         myRefToDatabase.child(categoryId).child("items").child(itemId).child("bookings").child(generatedId).setValue(generatedId);
+
+        myRefToDatabase = database.getReference("Users");
+        myRefToDatabase.child(getUserId()).child("bookings").child(generatedId).setValue(generatedId);
     }
 
     public String checkAvailability(){
@@ -236,8 +247,6 @@ public class ItemActivity extends AppCompatActivity {
 
                 if(!(till.before(intervalSelectatFrom) || intervalSelectatTill.before(from)))
                     return bookingDetails;
-/*                if(!(isBefore(till, intervalSelectatFrom) || isBefore(intervalSelectatTill, from)))
-                    return false;*/
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -350,6 +359,7 @@ public class ItemActivity extends AppCompatActivity {
                         Intent nextActivity;
                         nextActivity = new Intent(getBaseContext(), MyItemsReservations.class);
                         startActivity(nextActivity);
+                        break;
                     }
 
                     case R.id.nav_logout: {

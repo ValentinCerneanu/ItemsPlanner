@@ -9,21 +9,36 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.itemsplanner.R;
+import com.example.itemsplanner.models.Booking;
+import com.example.itemsplanner.models.BookingWrapper;
 import com.example.itemsplanner.models.Category;
+import com.example.itemsplanner.models.Interval;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
 
 public class MyItemsReservations extends AppCompatActivity {
 
@@ -35,10 +50,12 @@ public class MyItemsReservations extends AppCompatActivity {
     FirebaseDatabase database;
     DatabaseReference myRefToDatabase;
 
-    ArrayList<Category> categoriesList = new ArrayList<Category>();
-    ArrayAdapter<Category> adapter;
+    ArrayList<BookingWrapper> bookingsList = new ArrayList<BookingWrapper>();
+    ArrayAdapter<BookingWrapper> adapter;
 
-    JSONObject categories = null;
+    JSONObject bookings;
+    JSONObject userBookigs;
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -50,7 +67,99 @@ public class MyItemsReservations extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        adapter = new ArrayAdapter<BookingWrapper>(this, android.R.layout.simple_list_item_1, bookingsList);
+        final ListView list = (ListView) findViewById(R.id.list);
+        list.setAdapter(adapter);
+
+        bookings = getAllBookings();
+
         setupToolbarAndDrawer();
+    }
+
+    private JSONObject getAllBookings() {
+
+        final JSONObject[] bookings = {null};
+        database = FirebaseDatabase.getInstance();
+        myRefToDatabase = database.getReference("Bookings");
+        myRefToDatabase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    Gson gson = new Gson();
+                    String gsonString = gson.toJson(dataSnapshot.getValue());
+                    try {
+                        bookings[0] = new JSONObject(gsonString);
+                        userBookigs = getItemsReservations(bookings[0]);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        return bookings[0];
+    }
+
+    private JSONObject getItemsReservations(final JSONObject bookings) {
+        String userId = getUserId();
+
+        final JSONObject[] userBookings = {null};
+        database = FirebaseDatabase.getInstance();
+        myRefToDatabase = database.getReference("Users").child(userId).child("bookings");
+        myRefToDatabase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    Gson gson = new Gson();
+                    String gsonString = gson.toJson(dataSnapshot.getValue());
+                    try {
+                        userBookings[0] = new JSONObject(gsonString);
+                        setUpListAdapter(userBookings[0], bookings);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        return userBookings[0];
+    }
+
+    public void setUpListAdapter(JSONObject userBookigs, JSONObject bookings){
+        Iterator<String> iterator = userBookigs.keys();
+        while (iterator.hasNext()) {
+            String key = iterator.next();
+            try {
+                JSONObject bookingJSONObj = new JSONObject(bookings.get(key).toString());
+                DateFormat dateFormat = new SimpleDateFormat("yyyy MM dd");
+                try {
+                    Date from = dateFormat.parse(bookingJSONObj.getJSONObject("interval").getString("from"));
+                    Date till = dateFormat.parse(bookingJSONObj.getJSONObject("interval").getString("till"));
+                    Interval interval = new Interval(from, till);
+
+                    Booking booking = new Booking(bookingJSONObj.get("descriere").toString(), key, bookingJSONObj.get("itemName").toString(), bookingJSONObj.get("itemId").toString());
+
+                    BookingWrapper bookingWrapper = new BookingWrapper(booking, interval);
+
+                    bookingsList.add(bookingWrapper);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+            } catch (JSONException e) {
+                // Something went wrong!
+            }
+        }
+        adapter.notifyDataSetChanged();
     }
 
     private void setupToolbarAndDrawer() {
@@ -83,6 +192,7 @@ public class MyItemsReservations extends AppCompatActivity {
                         Intent nextActivity;
                         nextActivity = new Intent(getBaseContext(), MyItemsReservations.class);
                         startActivity(nextActivity);
+                        break;
                     }
 
                     case R.id.nav_logout: {
@@ -108,5 +218,10 @@ public class MyItemsReservations extends AppCompatActivity {
 
         titleTextView = (TextView) findViewById(R.id.barTitle);
         titleTextView.setText("Rezervarile mele");
+    }
+
+    public String getUserId(){
+        SharedPreferences sharedPreferences = getSharedPreferences("FirebaseUser", MODE_PRIVATE);
+        return sharedPreferences.getString("id", null);
     }
 }

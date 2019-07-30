@@ -124,6 +124,7 @@ public class ItemsActivity extends AppCompatActivity {
                         Intent nextActivity;
                         nextActivity = new Intent(getBaseContext(), MyItemsReservations.class);
                         startActivity(nextActivity);
+                        break;
                     }
 
                     case R.id.nav_logout: {

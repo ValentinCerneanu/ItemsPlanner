@@ -4,10 +4,30 @@ public class Booking {
     private String descriere;
     private String interval = "dummy";
     private String user;
+    private String itemName;
+    private String itemId;
 
-    public Booking(String descriere, String user) {
+    public Booking(String descriere, String user, String itemName, String itemId) {
         this.descriere = descriere;
         this.user = user;
+        this.itemName = itemName;
+        this.itemId = itemId;
+    }
+
+    public String getItemName() {
+        return itemName;
+    }
+
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
+    }
+
+    public String getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(String itemId) {
+        this.itemId = itemId;
     }
 
     public String getUser() {
@@ -28,9 +48,6 @@ public class Booking {
 
     @Override
     public String toString() {
-        return "{" +
-                "\"descriere\":\"" + descriere + "\"" +
-                ",\"user\":\"" + user + "\"" +
-                "}";
+        return itemName + "\n" + descriere;
     }
 }
