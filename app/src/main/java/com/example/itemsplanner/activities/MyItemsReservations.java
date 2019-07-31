@@ -1,5 +1,6 @@
 package com.example.itemsplanner.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.example.itemsplanner.CustomAdapters.MyReservationsAdapter;
 import com.example.itemsplanner.R;
 import com.example.itemsplanner.models.Booking;
 import com.example.itemsplanner.models.BookingWrapper;
@@ -51,7 +53,8 @@ public class MyItemsReservations extends AppCompatActivity {
     DatabaseReference myRefToDatabase;
 
     ArrayList<BookingWrapper> bookingsList = new ArrayList<BookingWrapper>();
-    ArrayAdapter<BookingWrapper> adapter;
+    //ArrayAdapter<BookingWrapper> adapter;
+    MyReservationsAdapter reservationsAdapter;
 
     JSONObject bookings;
     JSONObject userBookigs;
@@ -68,9 +71,12 @@ public class MyItemsReservations extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        adapter = new ArrayAdapter<BookingWrapper>(this, android.R.layout.simple_list_item_1, bookingsList);
+        //adapter = new ArrayAdapter<BookingWrapper>(this, android.R.layout.simple_list_item_1, bookingsList);
         final ListView list = (ListView) findViewById(R.id.list);
-        list.setAdapter(adapter);
+        Context context = MyItemsReservations.this;
+        reservationsAdapter = new MyReservationsAdapter(bookingsList, context);
+        reservationsAdapter.setUserId(getUserId());
+        list.setAdapter(reservationsAdapter);
 
         bookings = getAllBookings();
 
@@ -136,6 +142,7 @@ public class MyItemsReservations extends AppCompatActivity {
 
     public void setUpListAdapter(JSONObject userBookigs, JSONObject bookings){
         Iterator<String> iterator = userBookigs.keys();
+        bookingsList.clear();
         while (iterator.hasNext()) {
             String key = iterator.next();
             try {
@@ -146,11 +153,14 @@ public class MyItemsReservations extends AppCompatActivity {
                     Date till = dateFormat.parse(bookingJSONObj.getJSONObject("interval").getString("till"));
                     Interval interval = new Interval(from, till);
 
-                    Booking booking = new Booking(bookingJSONObj.get("descriere").toString(), key, bookingJSONObj.get("itemName").toString(), bookingJSONObj.get("itemId").toString());
-
+                    Booking booking = new Booking(bookingJSONObj.get("descriere").toString(), key,
+                                                  bookingJSONObj.get("itemName").toString(),
+                                                  bookingJSONObj.get("itemId").toString(),
+                                                  bookingJSONObj.get("categoryId").toString());
+                    booking.setBookingId(key);
                     BookingWrapper bookingWrapper = new BookingWrapper(booking, interval);
-
                     bookingsList.add(bookingWrapper);
+                    reservationsAdapter.notifyDataSetChanged();
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
@@ -159,7 +169,7 @@ public class MyItemsReservations extends AppCompatActivity {
                 // Something went wrong!
             }
         }
-        adapter.notifyDataSetChanged();
+        reservationsAdapter.notifyDataSetChanged();
     }
 
     private void setupToolbarAndDrawer() {
@@ -197,10 +207,10 @@ public class MyItemsReservations extends AppCompatActivity {
 
                     case R.id.nav_logout: {
                         FirebaseAuth.getInstance().signOut();
-                        Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), StartActivity.class);
+                        Intent nextActivity = new Intent(getBaseContext(), StartActivity.class);
+                        nextActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(nextActivity);
-                        finish();
+                        finishAffinity();
                     }
                     return true;
                 }

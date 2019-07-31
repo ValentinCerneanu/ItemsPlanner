@@ -6,12 +6,31 @@ public class Booking {
     private String user;
     private String itemName;
     private String itemId;
+    private String bookingId;
+    private String categoryId;
 
-    public Booking(String descriere, String user, String itemName, String itemId) {
+    public Booking(String descriere, String user, String itemName, String itemId, String categoryId) {
         this.descriere = descriere;
         this.user = user;
         this.itemName = itemName;
         this.itemId = itemId;
+        this.categoryId = categoryId;
+    }
+
+    public String getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(String categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public String getBookingId() {
+        return bookingId;
+    }
+
+    public void setBookingId(String bookingId) {
+        this.bookingId = bookingId;
     }
 
     public String getItemName() {

@@ -9,27 +9,43 @@
         android:roundIcon="@mipmap/ic_logo_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar">
-        <activity android:name=".activities.StartActivity">
+        <activity
+            android:name=".activities.StartActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.MainActivity"
+        <activity
+            android:name=".activities.MainActivity"
+            android:screenOrientation="portrait">
                  >
         </activity>
-        <activity android:name=".activities.LoginActivity">
+        <activity
+            android:name=".activities.LoginActivity"
+            android:screenOrientation="portrait">>
         </activity>
-        <activity android:name=".activities.RegisterActivity">
+        <activity
+            android:name=".activities.RegisterActivity"
+            android:screenOrientation="portrait">>
         </activity>
-        <activity android:name=".activities.ForgotPasswordActivity">
+        <activity
+            android:name=".activities.ForgotPasswordActivity"
+            android:screenOrientation="portrait">>
         </activity>
-        <activity android:name=".activities.ItemsActivity">
+        <activity
+            android:name=".activities.ItemsActivity"
+            android:screenOrientation="portrait">>
         </activity>
-        <activity android:name=".activities.ItemActivity">
+        <activity
+            android:name=".activities.ItemActivity"
+            android:screenOrientation="portrait">>
         </activity>
-        <activity android:name=".activities.MyItemsReservations">
+        <activity
+            android:name=".activities.MyItemsReservations"
+            android:screenOrientation="portrait">>
         </activity>
 
     </application>

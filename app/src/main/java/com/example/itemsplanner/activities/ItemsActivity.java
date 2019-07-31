@@ -42,6 +42,10 @@ public class ItemsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setupToolbarAndDrawer();
 
+        titleTextView = (TextView) findViewById(R.id.barTitle);
+        String categorie = (String) getIntent().getStringExtra("CATEGORY_NAME");
+        titleTextView.setText("Iteme din categoria " + categorie);
+
         adapter=new ArrayAdapter<Item>(this, android.R.layout.simple_list_item_1, itemsList);
         final ListView list = (ListView) findViewById(R.id.list);
         list.setAdapter(adapter);
@@ -129,10 +133,10 @@ public class ItemsActivity extends AppCompatActivity {
 
                     case R.id.nav_logout: {
                         FirebaseAuth.getInstance().signOut();
-                        Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), StartActivity.class);
+                        Intent nextActivity = new Intent(getBaseContext(), StartActivity.class);
+                        nextActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(nextActivity);
-                        finish();
+                        finishAffinity();
                     }
                     return true;
                 }
@@ -147,9 +151,5 @@ public class ItemsActivity extends AppCompatActivity {
                 drawerLayout .openDrawer(Gravity.LEFT);
             }
         });
-
-        titleTextView = (TextView) findViewById(R.id.barTitle);
-        String categorie = (String) getIntent().getStringExtra("CATEGORY_NAME");
-        titleTextView.setText("Iteme din categoria " + categorie);
     }
 }

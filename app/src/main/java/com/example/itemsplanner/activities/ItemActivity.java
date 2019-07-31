@@ -137,7 +137,9 @@ public class ItemActivity extends AppCompatActivity {
                         Date from = intervalSelectat.get(0);
                         Date till = intervalSelectat.get(intervalSelectat.size() - 1);
                         Booking booking = null;
-                        booking = new Booking(scopRezervare.getText().toString(), getUserId(), (String) getIntent().getStringExtra("ITEM_NAME"), itemId);
+                        booking = new Booking(scopRezervare.getText().toString(), getUserId(),
+                                (String) getIntent().getStringExtra("ITEM_NAME"), itemId,
+                                getIntent().getStringExtra("CATEGORY_ID"));
                         Interval interval = new Interval(from, till);
                         writeNewBooking(booking, interval);
                     } else {
@@ -190,6 +192,8 @@ public class ItemActivity extends AppCompatActivity {
 
 
     public void writeNewBooking(Booking booking, Interval interval){
+        String categoryId = getIntent().getStringExtra("CATEGORY_ID");
+        String itemId = getIntent().getStringExtra("ITEM_ID");
         database = FirebaseDatabase.getInstance();
         myRefToDatabase = database.getReference("Bookings");
         myRefToDatabase = myRefToDatabase.push();
@@ -225,8 +229,7 @@ public class ItemActivity extends AppCompatActivity {
                     public void onFailure(@NonNull Exception e) {
                     }
                 });
-        String categoryId = getIntent().getStringExtra("CATEGORY_ID");
-        String itemId = getIntent().getStringExtra("ITEM_ID");
+
         myRefToDatabase = database.getReference("Categories");
         myRefToDatabase.child(categoryId).child("items").child(itemId).child("bookings").child(generatedId).setValue(generatedId);
 
@@ -264,7 +267,7 @@ public class ItemActivity extends AppCompatActivity {
 
                 database = FirebaseDatabase.getInstance();
                 myRefToDatabase = database.getReference("Bookings");
-                myRefToDatabase.addValueEventListener(new ValueEventListener() {
+                myRefToDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
@@ -364,10 +367,10 @@ public class ItemActivity extends AppCompatActivity {
 
                     case R.id.nav_logout: {
                         FirebaseAuth.getInstance().signOut();
-                        Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), StartActivity.class);
+                        Intent nextActivity = new Intent(getBaseContext(), StartActivity.class);
+                        nextActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(nextActivity);
-                        finish();
+                        finishAffinity();
                     }
                     return true;
                 }

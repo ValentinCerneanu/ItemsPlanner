@@ -203,10 +203,10 @@ public class MainActivity extends AppCompatActivity {
 
                     case R.id.nav_logout: {
                         FirebaseAuth.getInstance().signOut();
-                        Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), StartActivity.class);
+                        Intent nextActivity = new Intent(getBaseContext(), StartActivity.class);
+                        nextActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(nextActivity);
-                        finish();
+                        finishAffinity();
                     }
                     return true;
                 }
