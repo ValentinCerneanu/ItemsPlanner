@@ -8,7 +8,6 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -21,7 +20,6 @@ import com.example.itemsplanner.CustomAdapters.MyReservationsAdapter;
 import com.example.itemsplanner.R;
 import com.example.itemsplanner.models.Booking;
 import com.example.itemsplanner.models.BookingWrapper;
-import com.example.itemsplanner.models.Category;
 import com.example.itemsplanner.models.Interval;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -42,7 +40,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 
-public class MyItemsReservations extends AppCompatActivity {
+public class AdminPanelActivity extends AppCompatActivity {
 
     DrawerLayout drawerLayout;
     NavigationView navigationView;
@@ -56,8 +54,6 @@ public class MyItemsReservations extends AppCompatActivity {
     MyReservationsAdapter reservationsAdapter;
 
     JSONObject bookings;
-    JSONObject userBookigs;
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -71,7 +67,7 @@ public class MyItemsReservations extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final ListView list = (ListView) findViewById(R.id.list);
-        Context context = MyItemsReservations.this;
+        Context context = AdminPanelActivity.this;
         reservationsAdapter = new MyReservationsAdapter(bookingsList, context);
         reservationsAdapter.setUserId(getUserId());
         list.setAdapter(reservationsAdapter);
@@ -94,7 +90,7 @@ public class MyItemsReservations extends AppCompatActivity {
                     String gsonString = gson.toJson(dataSnapshot.getValue());
                     try {
                         bookings[0] = new JSONObject(gsonString);
-                        userBookigs = getItemsReservations(bookings[0]);
+                        setUpListAdapter(bookings[0]);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -109,37 +105,8 @@ public class MyItemsReservations extends AppCompatActivity {
         return bookings[0];
     }
 
-    private JSONObject getItemsReservations(final JSONObject bookings) {
-        String userId = getUserId();
-
-        final JSONObject[] userBookings = {null};
-        database = FirebaseDatabase.getInstance();
-        myRefToDatabase = database.getReference("Users").child(userId).child("bookings");
-        myRefToDatabase.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    Gson gson = new Gson();
-                    String gsonString = gson.toJson(dataSnapshot.getValue());
-                    try {
-                        userBookings[0] = new JSONObject(gsonString);
-                        setUpListAdapter(userBookings[0], bookings);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-        return userBookings[0];
-    }
-
-    public void setUpListAdapter(JSONObject userBookigs, JSONObject bookings){
-        Iterator<String> iterator = userBookigs.keys();
+    public void setUpListAdapter(JSONObject bookings){
+        Iterator<String> iterator = bookings.keys();
         bookingsList.clear();
         while (iterator.hasNext()) {
             String key = iterator.next();
@@ -152,10 +119,11 @@ public class MyItemsReservations extends AppCompatActivity {
                     Interval interval = new Interval(from, till);
 
                     Booking booking = new Booking(bookingJSONObj.get("descriere").toString(), key,
-                                                  bookingJSONObj.get("itemName").toString(),
-                                                  bookingJSONObj.get("itemId").toString(),
-                                                  bookingJSONObj.get("categoryId").toString());
+                            bookingJSONObj.get("itemName").toString(),
+                            bookingJSONObj.get("itemId").toString(),
+                            bookingJSONObj.get("categoryId").toString());
                     booking.setBookingId(key);
+                    booking.setUserName("Vali");
                     BookingWrapper bookingWrapper = new BookingWrapper(booking, interval);
                     bookingsList.add(bookingWrapper);
                     reservationsAdapter.notifyDataSetChanged();
@@ -225,7 +193,7 @@ public class MyItemsReservations extends AppCompatActivity {
         });
 
         titleTextView = (TextView) findViewById(R.id.barTitle);
-        titleTextView.setText("Rezervarile mele");
+        titleTextView.setText("AdminPanel Toate Rezervarile");
     }
 
     public String getUserId(){

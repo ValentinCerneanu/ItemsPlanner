@@ -8,6 +8,7 @@ public class Booking {
     private String itemId;
     private String bookingId;
     private String categoryId;
+    private String userName;
 
     public Booking(String descriere, String user, String itemName, String itemId, String categoryId) {
         this.descriere = descriere;
@@ -15,6 +16,14 @@ public class Booking {
         this.itemName = itemName;
         this.itemId = itemId;
         this.categoryId = categoryId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public String getCategoryId() {
@@ -67,6 +76,9 @@ public class Booking {
 
     @Override
     public String toString() {
-        return itemName + "\n" + descriere;
+        if(userName == null){
+            return itemName + "\n" + descriere;
+        }
+        return itemName + "\n" + descriere + "\n" + userName;
     }
 }

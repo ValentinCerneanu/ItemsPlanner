@@ -201,6 +201,13 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     }
 
+                    case R.id.nav_admin_panel: {
+                        Intent nextActivity;
+                        nextActivity = new Intent(getBaseContext(), AdminPanelActivity.class);
+                        startActivity(nextActivity);
+                        break;
+                    }
+
                     case R.id.nav_logout: {
                         FirebaseAuth.getInstance().signOut();
                         Intent nextActivity = new Intent(getBaseContext(), StartActivity.class);

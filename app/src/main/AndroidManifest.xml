@@ -48,6 +48,11 @@
             android:screenOrientation="portrait">>
         </activity>
 
+        <activity
+            android:name=".activities.AdminPanelActivity"
+            android:screenOrientation="portrait">>
+        </activity>
+
     </application>
 
 </manifest>
