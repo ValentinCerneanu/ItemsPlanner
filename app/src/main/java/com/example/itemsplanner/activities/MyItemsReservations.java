@@ -170,7 +170,7 @@ public class MyItemsReservations extends AppCompatActivity {
         reservationsAdapter.notifyDataSetChanged();
     }
 
-    private void setupToolbarAndDrawer() {
+    private void setupToolbarAndDrawer(){
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.bringToFront();
 
@@ -181,7 +181,7 @@ public class MyItemsReservations extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("FirebaseUser", MODE_PRIVATE);
         String userName = sharedPreferences.getString("name", "");
         if (userName != null) {
-            userEditText.setText("Hello, " + userName + "!");
+            userEditText.setText("Hello, " + userName +"!");
         }
 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -196,9 +196,23 @@ public class MyItemsReservations extends AppCompatActivity {
                 //Closing drawer on item click
                 drawerLayout.closeDrawers();
                 switch (menuItem.getItemId()) {
+                    case R.id.nav_home: {
+                        Intent nextActivity;
+                        nextActivity = new Intent(getBaseContext(), MainActivity.class);
+                        startActivity(nextActivity);
+                        finishAffinity();
+                        break;
+                    }
                     case R.id.nav_my_items_reservations: {
                         Intent nextActivity;
                         nextActivity = new Intent(getBaseContext(), MyItemsReservations.class);
+                        startActivity(nextActivity);
+                        break;
+                    }
+
+                    case R.id.nav_admin_panel: {
+                        Intent nextActivity;
+                        nextActivity = new Intent(getBaseContext(), AdminPanelActivity.class);
                         startActivity(nextActivity);
                         break;
                     }
@@ -216,16 +230,21 @@ public class MyItemsReservations extends AppCompatActivity {
             }
         });
 
+        Menu nav_Menu = navigationView.getMenu();
+        if(sharedPreferences.getString("isAdmin", "").equals("false")){
+            nav_Menu.findItem(R.id.nav_admin_panel).setVisible(false);
+        }
+
         burgerBtn = (ImageButton) findViewById(R.id.hamburger_btn);
         burgerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                drawerLayout.openDrawer(Gravity.LEFT);
+                drawerLayout .openDrawer(Gravity.LEFT);
             }
         });
 
         titleTextView = (TextView) findViewById(R.id.barTitle);
-        titleTextView.setText("Rezervarile mele");
+        titleTextView.setText("Categorii");
     }
 
     public String getUserId(){

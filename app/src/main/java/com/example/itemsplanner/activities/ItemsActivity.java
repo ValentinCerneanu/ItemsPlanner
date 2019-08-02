@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Gravity;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -49,7 +50,6 @@ public class ItemsActivity extends AppCompatActivity {
         adapter=new ArrayAdapter<Item>(this, android.R.layout.simple_list_item_1, itemsList);
         final ListView list = (ListView) findViewById(R.id.list);
         list.setAdapter(adapter);
-
         String itemsString = (String) getIntent().getSerializableExtra("ITEMS_LIST");
         if(itemsString != null) {
             try {
@@ -119,14 +119,30 @@ public class ItemsActivity extends AppCompatActivity {
             // This method will trigger on item Click of navigation menu
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
-                if (menuItem.isChecked()) menuItem.setChecked(false);
-                else menuItem.setChecked(true);
+                if (menuItem.isChecked())
+                    menuItem.setChecked(false);
+                else
+                    menuItem.setChecked(true);
                 //Closing drawer on item click
                 drawerLayout.closeDrawers();
                 switch (menuItem.getItemId()) {
+                    case R.id.nav_home: {
+                        Intent nextActivity;
+                        nextActivity = new Intent(getBaseContext(), MainActivity.class);
+                        startActivity(nextActivity);
+                        finishAffinity();
+                        break;
+                    }
                     case R.id.nav_my_items_reservations: {
                         Intent nextActivity;
                         nextActivity = new Intent(getBaseContext(), MyItemsReservations.class);
+                        startActivity(nextActivity);
+                        break;
+                    }
+
+                    case R.id.nav_admin_panel: {
+                        Intent nextActivity;
+                        nextActivity = new Intent(getBaseContext(), AdminPanelActivity.class);
                         startActivity(nextActivity);
                         break;
                     }
@@ -144,6 +160,11 @@ public class ItemsActivity extends AppCompatActivity {
             }
         });
 
+        Menu nav_Menu = navigationView.getMenu();
+        if(sharedPreferences.getString("isAdmin", "").equals("false")){
+            nav_Menu.findItem(R.id.nav_admin_panel).setVisible(false);
+        }
+
         burgerBtn = (ImageButton) findViewById(R.id.hamburger_btn);
         burgerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -151,5 +172,8 @@ public class ItemsActivity extends AppCompatActivity {
                 drawerLayout .openDrawer(Gravity.LEFT);
             }
         });
+
+        titleTextView = (TextView) findViewById(R.id.barTitle);
+        titleTextView.setText("Categorii");
     }
 }

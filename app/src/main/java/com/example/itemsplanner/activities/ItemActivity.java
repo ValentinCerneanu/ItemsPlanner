@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -353,14 +354,30 @@ public class ItemActivity extends AppCompatActivity {
             // This method will trigger on item Click of navigation menu
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
-                if (menuItem.isChecked()) menuItem.setChecked(false);
-                else menuItem.setChecked(true);
+                if (menuItem.isChecked())
+                    menuItem.setChecked(false);
+                else
+                    menuItem.setChecked(true);
                 //Closing drawer on item click
                 drawerLayout.closeDrawers();
                 switch (menuItem.getItemId()) {
+                    case R.id.nav_home: {
+                        Intent nextActivity;
+                        nextActivity = new Intent(getBaseContext(), MainActivity.class);
+                        startActivity(nextActivity);
+                        finishAffinity();
+                        break;
+                    }
                     case R.id.nav_my_items_reservations: {
                         Intent nextActivity;
                         nextActivity = new Intent(getBaseContext(), MyItemsReservations.class);
+                        startActivity(nextActivity);
+                        break;
+                    }
+
+                    case R.id.nav_admin_panel: {
+                        Intent nextActivity;
+                        nextActivity = new Intent(getBaseContext(), AdminPanelActivity.class);
                         startActivity(nextActivity);
                         break;
                     }
@@ -378,6 +395,11 @@ public class ItemActivity extends AppCompatActivity {
             }
         });
 
+        Menu nav_Menu = navigationView.getMenu();
+        if(sharedPreferences.getString("isAdmin", "").equals("false")){
+            nav_Menu.findItem(R.id.nav_admin_panel).setVisible(false);
+        }
+
         burgerBtn = (ImageButton) findViewById(R.id.hamburger_btn);
         burgerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -387,8 +409,7 @@ public class ItemActivity extends AppCompatActivity {
         });
 
         titleTextView = (TextView) findViewById(R.id.barTitle);
-        String itemName = (String) getIntent().getStringExtra("ITEM_NAME");
-        titleTextView.setText(itemName);
+        titleTextView.setText("Categorii");
     }
 
     public String getUserId(){

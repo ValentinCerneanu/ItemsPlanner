@@ -56,9 +56,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     public static Activity act;
 
-    FirebaseDatabase database;
-    DatabaseReference myRefToDatabase;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

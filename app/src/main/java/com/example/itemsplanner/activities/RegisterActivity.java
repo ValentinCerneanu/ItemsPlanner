@@ -133,6 +133,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void writeToUsersTable(final FirebaseUser firebaseUser, final User user){
+        user.setIsAdmin("false");
         database = FirebaseDatabase.getInstance();
         myRefToDatabase = database.getReference("Users");
         myRefToDatabase.child(firebaseUser.getUid()).setValue(user);
@@ -142,6 +143,7 @@ public class RegisterActivity extends AppCompatActivity {
         ed.putString("name", user.getName());
         ed.putString("email", firebaseUser.getEmail());
         ed.putString("phoneNumber",  user.getPhoneNumber());
+        ed.putString("isAdmin",  "false");
         ed.commit();
     }
 

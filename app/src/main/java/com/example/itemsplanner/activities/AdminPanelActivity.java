@@ -29,6 +29,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -54,6 +55,7 @@ public class AdminPanelActivity extends AppCompatActivity {
     MyReservationsAdapter reservationsAdapter;
 
     JSONObject bookings;
+    JSONObject users;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -90,7 +92,7 @@ public class AdminPanelActivity extends AppCompatActivity {
                     String gsonString = gson.toJson(dataSnapshot.getValue());
                     try {
                         bookings[0] = new JSONObject(gsonString);
-                        setUpListAdapter(bookings[0]);
+                        users = getAllUsers(bookings[0]);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -105,7 +107,35 @@ public class AdminPanelActivity extends AppCompatActivity {
         return bookings[0];
     }
 
-    public void setUpListAdapter(JSONObject bookings){
+    private JSONObject getAllUsers(final JSONObject bookings) {
+
+        final JSONObject[] users = {null};
+        database = FirebaseDatabase.getInstance();
+        myRefToDatabase = database.getReference("Users");
+        myRefToDatabase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    Gson gson = new Gson();
+                    String gsonString = gson.toJson(dataSnapshot.getValue());
+                    try {
+                        users[0] = new JSONObject(gsonString);
+                        setUpListAdapter(bookings, users[0]);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        return users[0];
+    }
+
+    public void setUpListAdapter(JSONObject bookings, JSONObject users){
         Iterator<String> iterator = bookings.keys();
         bookingsList.clear();
         while (iterator.hasNext()) {
@@ -118,13 +148,14 @@ public class AdminPanelActivity extends AppCompatActivity {
                     Date till = dateFormat.parse(bookingJSONObj.getJSONObject("interval").getString("till"));
                     Interval interval = new Interval(from, till);
 
-                    Booking booking = new Booking(bookingJSONObj.get("descriere").toString(), key,
+                    Booking booking = new Booking(bookingJSONObj.get("descriere").toString(), bookingJSONObj.get("user").toString(),
                             bookingJSONObj.get("itemName").toString(),
                             bookingJSONObj.get("itemId").toString(),
                             bookingJSONObj.get("categoryId").toString());
                     booking.setBookingId(key);
-                    booking.setUserName("Vali");
+                    booking.setUserName(users.getJSONObject(booking.getUser()).getString("name"));
                     BookingWrapper bookingWrapper = new BookingWrapper(booking, interval);
+                    bookingWrapper.setPhoneNumber(users.getJSONObject(booking.getUser()).getString("phoneNumber"));
                     bookingsList.add(bookingWrapper);
                     reservationsAdapter.notifyDataSetChanged();
                 } catch (ParseException e) {
@@ -132,13 +163,13 @@ public class AdminPanelActivity extends AppCompatActivity {
                 }
 
             } catch (JSONException e) {
-                // Something went wrong!
+                e.printStackTrace();
             }
         }
         reservationsAdapter.notifyDataSetChanged();
     }
 
-    private void setupToolbarAndDrawer() {
+    private void setupToolbarAndDrawer(){
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.bringToFront();
 
@@ -149,7 +180,7 @@ public class AdminPanelActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("FirebaseUser", MODE_PRIVATE);
         String userName = sharedPreferences.getString("name", "");
         if (userName != null) {
-            userEditText.setText("Hello, " + userName + "!");
+            userEditText.setText("Hello, " + userName +"!");
         }
 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -164,9 +195,23 @@ public class AdminPanelActivity extends AppCompatActivity {
                 //Closing drawer on item click
                 drawerLayout.closeDrawers();
                 switch (menuItem.getItemId()) {
+                    case R.id.nav_home: {
+                        Intent nextActivity;
+                        nextActivity = new Intent(getBaseContext(), MainActivity.class);
+                        startActivity(nextActivity);
+                        finishAffinity();
+                        break;
+                    }
                     case R.id.nav_my_items_reservations: {
                         Intent nextActivity;
                         nextActivity = new Intent(getBaseContext(), MyItemsReservations.class);
+                        startActivity(nextActivity);
+                        break;
+                    }
+
+                    case R.id.nav_admin_panel: {
+                        Intent nextActivity;
+                        nextActivity = new Intent(getBaseContext(), AdminPanelActivity.class);
                         startActivity(nextActivity);
                         break;
                     }
@@ -184,16 +229,21 @@ public class AdminPanelActivity extends AppCompatActivity {
             }
         });
 
+        Menu nav_Menu = navigationView.getMenu();
+        if(sharedPreferences.getString("isAdmin", "").equals("false")){
+            nav_Menu.findItem(R.id.nav_admin_panel).setVisible(false);
+        }
+
         burgerBtn = (ImageButton) findViewById(R.id.hamburger_btn);
         burgerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                drawerLayout.openDrawer(Gravity.LEFT);
+                drawerLayout .openDrawer(Gravity.LEFT);
             }
         });
 
         titleTextView = (TextView) findViewById(R.id.barTitle);
-        titleTextView.setText("AdminPanel Toate Rezervarile");
+        titleTextView.setText("Categorii");
     }
 
     public String getUserId(){

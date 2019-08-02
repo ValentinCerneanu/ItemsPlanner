@@ -65,8 +65,6 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser user = mAuth.getCurrentUser();
         getDataForUser(user);
 
-
-
         adapter = new ArrayAdapter<Category>(this, android.R.layout.simple_list_item_1, categoriesList);
         final ListView list = (ListView) findViewById(R.id.list);
         list.setAdapter(adapter);
@@ -79,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 if (dataSnapshot.exists()){
                     Gson gson = new Gson();
                     String gsonString = gson.toJson(dataSnapshot.getValue());
-
+                    categoriesList.clear();
                     try {
                         categories = new JSONObject(gsonString);
                         Iterator<String> iterator = categories.keys();
@@ -146,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         JSONObject userJson = new JSONObject(gsonString);
                         user = new User(userJson.getString("name"), userJson.getString("phoneNumber"));
-
+                        user.setIsAdmin(userJson.getString("isAdmin"));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -156,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
                     ed.putString("name", user.getName());
                     ed.putString("email", firebaseUser.getEmail());
                     ed.putString("phoneNumber",  user.getPhoneNumber());
+                    ed.putString("isAdmin",  user.getIsAdmin());
                     ed.commit();
                     setupToolbarAndDrawer();
                 }
@@ -194,6 +193,13 @@ public class MainActivity extends AppCompatActivity {
                 //Closing drawer on item click
                 drawerLayout.closeDrawers();
                 switch (menuItem.getItemId()) {
+                    case R.id.nav_home: {
+                        Intent nextActivity;
+                        nextActivity = new Intent(getBaseContext(), MainActivity.class);
+                        startActivity(nextActivity);
+                        finishAffinity();
+                        break;
+                    }
                     case R.id.nav_my_items_reservations: {
                         Intent nextActivity;
                         nextActivity = new Intent(getBaseContext(), MyItemsReservations.class);
@@ -220,6 +226,11 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+        Menu nav_Menu = navigationView.getMenu();
+        if(sharedPreferences.getString("isAdmin", "").equals("false")){
+            nav_Menu.findItem(R.id.nav_admin_panel).setVisible(false);
+        }
 
         burgerBtn = (ImageButton) findViewById(R.id.hamburger_btn);
         burgerBtn.setOnClickListener(new View.OnClickListener() {
