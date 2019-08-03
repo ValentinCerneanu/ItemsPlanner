@@ -43,10 +43,6 @@ public class ItemsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setupToolbarAndDrawer();
 
-        titleTextView = (TextView) findViewById(R.id.barTitle);
-        String categorie = (String) getIntent().getStringExtra("CATEGORY_NAME");
-        titleTextView.setText("Iteme din categoria " + categorie);
-
         adapter=new ArrayAdapter<Item>(this, android.R.layout.simple_list_item_1, itemsList);
         final ListView list = (ListView) findViewById(R.id.list);
         list.setAdapter(adapter);
@@ -174,6 +170,8 @@ public class ItemsActivity extends AppCompatActivity {
         });
 
         titleTextView = (TextView) findViewById(R.id.barTitle);
-        titleTextView.setText("Categorii");
+
+        String categorie = (String) getIntent().getStringExtra("CATEGORY_NAME");
+        titleTextView.setText("Iteme din categoria " + categorie);
     }
 }

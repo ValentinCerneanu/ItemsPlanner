@@ -243,7 +243,7 @@ public class AdminPanelActivity extends AppCompatActivity {
         });
 
         titleTextView = (TextView) findViewById(R.id.barTitle);
-        titleTextView.setText("Categorii");
+        titleTextView.setText("AdminPanel Toate Rezervarile");
     }
 
     public String getUserId(){

@@ -409,7 +409,8 @@ public class ItemActivity extends AppCompatActivity {
         });
 
         titleTextView = (TextView) findViewById(R.id.barTitle);
-        titleTextView.setText("Categorii");
+        String itemName = (String) getIntent().getStringExtra("ITEM_NAME");
+        titleTextView.setText(itemName);
     }
 
     public String getUserId(){

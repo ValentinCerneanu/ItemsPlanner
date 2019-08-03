@@ -244,7 +244,7 @@ public class MyItemsReservations extends AppCompatActivity {
         });
 
         titleTextView = (TextView) findViewById(R.id.barTitle);
-        titleTextView.setText("Categorii");
+        titleTextView.setText("Rezervarile mele");
     }
 
     public String getUserId(){
