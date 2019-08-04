@@ -18,16 +18,11 @@ import java.util.ArrayList;
 public class MyReservationsAdapter extends BaseAdapter implements ListAdapter {
     private ArrayList<BookingWrapper> list = new ArrayList<BookingWrapper>();
     private Context context;
-    String userId;
     FirebaseDatabase database;
 
     public MyReservationsAdapter(ArrayList<BookingWrapper> list, Context context) {
         this.list = list;
         this.context = context;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
     }
 
     @Override
@@ -69,6 +64,7 @@ public class MyReservationsAdapter extends BaseAdapter implements ListAdapter {
                 String bookingId = list.get(position).getBooking().getBookingId();
                 String itemId = list.get(position).getBooking().getItemId();
                 String categoryId = list.get(position).getBooking().getCategoryId();
+                String userId = list.get(position).getBooking().getUser();
                 database.getReference("Bookings").child(bookingId).removeValue();
                 database.getReference("Users").child(userId).child("bookings").child(bookingId).removeValue();
                 database.getReference("Categories").child(categoryId).child("items").child(itemId).child("bookings").child(bookingId).removeValue();

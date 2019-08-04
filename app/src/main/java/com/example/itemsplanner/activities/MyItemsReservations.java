@@ -73,7 +73,6 @@ public class MyItemsReservations extends AppCompatActivity {
         final ListView list = (ListView) findViewById(R.id.list);
         Context context = MyItemsReservations.this;
         reservationsAdapter = new MyReservationsAdapter(bookingsList, context);
-        reservationsAdapter.setUserId(getUserId());
         list.setAdapter(reservationsAdapter);
 
         bookings = getAllBookings();
@@ -150,15 +149,15 @@ public class MyItemsReservations extends AppCompatActivity {
                     Date from = dateFormat.parse(bookingJSONObj.getJSONObject("interval").getString("from"));
                     Date till = dateFormat.parse(bookingJSONObj.getJSONObject("interval").getString("till"));
                     Interval interval = new Interval(from, till);
-
-                    Booking booking = new Booking(bookingJSONObj.get("descriere").toString(), key,
+                    Booking booking = new Booking(bookingJSONObj.get("descriere").toString(),
+                                                  bookingJSONObj.get("user").toString(),
                                                   bookingJSONObj.get("itemName").toString(),
                                                   bookingJSONObj.get("itemId").toString(),
                                                   bookingJSONObj.get("categoryId").toString());
                     booking.setBookingId(key);
                     BookingWrapper bookingWrapper = new BookingWrapper(booking, interval);
                     bookingsList.add(bookingWrapper);
-                    reservationsAdapter.notifyDataSetChanged();
+                    //reservationsAdapter.notifyDataSetChanged();
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }

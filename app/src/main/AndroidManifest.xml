@@ -21,36 +21,35 @@
         <activity
             android:name=".activities.MainActivity"
             android:screenOrientation="portrait">
-                 >
         </activity>
         <activity
             android:name=".activities.LoginActivity"
-            android:screenOrientation="portrait">>
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".activities.RegisterActivity"
-            android:screenOrientation="portrait">>
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".activities.ForgotPasswordActivity"
-            android:screenOrientation="portrait">>
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".activities.ItemsActivity"
-            android:screenOrientation="portrait">>
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".activities.ItemActivity"
-            android:screenOrientation="portrait">>
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".activities.MyItemsReservations"
-            android:screenOrientation="portrait">>
+            android:screenOrientation="portrait">
         </activity>
 
         <activity
             android:name=".activities.AdminPanelActivity"
-            android:screenOrientation="portrait">>
+            android:screenOrientation="portrait">
         </activity>
 
     </application>
