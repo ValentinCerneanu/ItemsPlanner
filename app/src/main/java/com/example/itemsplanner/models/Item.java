@@ -6,7 +6,7 @@ public class Item {
     private String imageUrl;
     private String descriere;
 
-    public Item(String id, String name, String imageUrl, String descriere){
+    public Item(String id, String name, String descriere){
         this.id = id;
         this.name = name;
         this.imageUrl = imageUrl;

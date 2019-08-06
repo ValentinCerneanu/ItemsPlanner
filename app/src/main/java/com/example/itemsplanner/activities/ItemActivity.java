@@ -2,16 +2,17 @@ package com.example.itemsplanner.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -110,6 +111,17 @@ public class ItemActivity extends AppCompatActivity {
         setupCalendar();
 
         scopRezervare = findViewById(R.id.scopRezervare);
+        scopRezervare.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+                if (id == EditorInfo.IME_ACTION_NEXT || id == EditorInfo.IME_NULL) {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0);
+                    return true;
+                }
+                return false;
+            }
+        });
 
         butonRezerva = findViewById(R.id.btn_rezerva);
         butonRezerva.setOnClickListener(new View.OnClickListener() {
@@ -404,6 +416,8 @@ public class ItemActivity extends AppCompatActivity {
         burgerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0);
                 drawerLayout .openDrawer(Gravity.LEFT);
             }
         });

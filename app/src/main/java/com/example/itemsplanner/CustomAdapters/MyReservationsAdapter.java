@@ -75,6 +75,4 @@ public class MyReservationsAdapter extends BaseAdapter implements ListAdapter {
 
         return view;
     }
-
-
 }

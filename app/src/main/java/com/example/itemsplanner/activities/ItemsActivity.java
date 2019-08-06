@@ -1,5 +1,6 @@
 package com.example.itemsplanner.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -7,6 +8,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
@@ -55,8 +57,8 @@ public class ItemsActivity extends AppCompatActivity {
                     String key = iterator.next();
                     try {
                         JSONObject item = new JSONObject(items.get(key).toString());
-                        itemsList.add(new Item(key, item.get("name").toString(), item.get("image_url").toString(),
-                                item.get("descriere").toString()));
+                        itemsList.add(new Item(key, item.get("name").toString(),
+                                                item.get("descriere").toString()));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
