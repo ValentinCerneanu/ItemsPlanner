@@ -1,4 +1,4 @@
-package com.example.itemsplanner.activities;
+package com.godmother.itemsplanner.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -17,8 +17,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.itemsplanner.R;
-import com.example.itemsplanner.models.User;
+import com.godmother.itemsplanner.R;
+import com.godmother.itemsplanner.models.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;

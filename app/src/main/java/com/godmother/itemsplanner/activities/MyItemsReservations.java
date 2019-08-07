@@ -1,4 +1,4 @@
-package com.example.itemsplanner.activities;
+package com.godmother.itemsplanner.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,11 +16,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.example.itemsplanner.CustomAdapters.MyReservationsAdapter;
-import com.example.itemsplanner.R;
-import com.example.itemsplanner.models.Booking;
-import com.example.itemsplanner.models.BookingWrapper;
-import com.example.itemsplanner.models.Interval;
+import com.godmother.itemsplanner.CustomAdapters.MyReservationsAdapter;
+import com.godmother.itemsplanner.R;
+import com.godmother.itemsplanner.models.Booking;
+import com.godmother.itemsplanner.models.BookingWrapper;
+import com.godmother.itemsplanner.models.Interval;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -40,7 +40,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 
-public class AdminPanelActivity extends AppCompatActivity {
+public class MyItemsReservations extends AppCompatActivity {
 
     DrawerLayout drawerLayout;
     NavigationView navigationView;
@@ -54,7 +54,8 @@ public class AdminPanelActivity extends AppCompatActivity {
     MyReservationsAdapter reservationsAdapter;
 
     JSONObject bookings;
-    JSONObject users;
+    JSONObject userBookigs;
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -68,44 +69,16 @@ public class AdminPanelActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final ListView list = (ListView) findViewById(R.id.list);
-        Context context = AdminPanelActivity.this;
+        Context context = MyItemsReservations.this;
         reservationsAdapter = new MyReservationsAdapter(bookingsList, context);
         list.setAdapter(reservationsAdapter);
 
-        users = getAllUsers();
+        bookings = getAllBookings();
 
         setupToolbarAndDrawer();
     }
 
-    private JSONObject getAllUsers() {
-
-        final JSONObject[] users = {null};
-        database = FirebaseDatabase.getInstance();
-        myRefToDatabase = database.getReference("Users");
-        myRefToDatabase.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    Gson gson = new Gson();
-                    String gsonString = gson.toJson(dataSnapshot.getValue());
-                    try {
-                        users[0] = new JSONObject(gsonString);
-                        bookings = getAllBookings(users[0]);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-        return users[0];
-    }
-
-    private JSONObject getAllBookings(final JSONObject users) {
+    private JSONObject getAllBookings() {
 
         final JSONObject[] bookings = {null};
         database = FirebaseDatabase.getInstance();
@@ -118,7 +91,7 @@ public class AdminPanelActivity extends AppCompatActivity {
                     String gsonString = gson.toJson(dataSnapshot.getValue());
                     try {
                         bookings[0] = new JSONObject(gsonString);
-                        setUpListAdapter(bookings[0], users);
+                        userBookigs = getItemsReservations(bookings[0]);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -133,8 +106,37 @@ public class AdminPanelActivity extends AppCompatActivity {
         return bookings[0];
     }
 
-    public void setUpListAdapter(JSONObject bookings, JSONObject users){
-        Iterator<String> iterator = bookings.keys();
+    private JSONObject getItemsReservations(final JSONObject bookings) {
+        String userId = getUserId();
+
+        final JSONObject[] userBookings = {null};
+        database = FirebaseDatabase.getInstance();
+        myRefToDatabase = database.getReference("Users").child(userId).child("bookings");
+        myRefToDatabase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    Gson gson = new Gson();
+                    String gsonString = gson.toJson(dataSnapshot.getValue());
+                    try {
+                        userBookings[0] = new JSONObject(gsonString);
+                        setUpListAdapter(userBookings[0], bookings);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        return userBookings[0];
+    }
+
+    public void setUpListAdapter(JSONObject userBookigs, JSONObject bookings){
+        Iterator<String> iterator = userBookigs.keys();
         bookingsList.clear();
         while (iterator.hasNext()) {
             String key = iterator.next();
@@ -145,16 +147,13 @@ public class AdminPanelActivity extends AppCompatActivity {
                     Date from = dateFormat.parse(bookingJSONObj.getJSONObject("interval").getString("from"));
                     Date till = dateFormat.parse(bookingJSONObj.getJSONObject("interval").getString("till"));
                     Interval interval = new Interval(from, till);
-
                     Booking booking = new Booking(bookingJSONObj.get("descriere").toString(),
-                            bookingJSONObj.get("user").toString(),
-                            bookingJSONObj.get("itemName").toString(),
-                            bookingJSONObj.get("itemId").toString(),
-                            bookingJSONObj.get("categoryId").toString());
+                                                  bookingJSONObj.get("user").toString(),
+                                                  bookingJSONObj.get("itemName").toString(),
+                                                  bookingJSONObj.get("itemId").toString(),
+                                                  bookingJSONObj.get("categoryId").toString());
                     booking.setBookingId(key);
-                    booking.setUserName(users.getJSONObject(booking.getUser()).getString("name"));
                     BookingWrapper bookingWrapper = new BookingWrapper(booking, interval);
-                    bookingWrapper.setPhoneNumber(users.getJSONObject(booking.getUser()).getString("phoneNumber"));
                     bookingsList.add(bookingWrapper);
                     //reservationsAdapter.notifyDataSetChanged();
                 } catch (ParseException e) {
@@ -162,7 +161,7 @@ public class AdminPanelActivity extends AppCompatActivity {
                 }
 
             } catch (JSONException e) {
-                e.printStackTrace();
+                // Something went wrong!
             }
         }
         reservationsAdapter.notifyDataSetChanged();
@@ -242,7 +241,11 @@ public class AdminPanelActivity extends AppCompatActivity {
         });
 
         titleTextView = (TextView) findViewById(R.id.barTitle);
-        titleTextView.setText("AdminPanel Toate Rezervarile");
+        titleTextView.setText("Rezervarile mele");
     }
 
+    public String getUserId(){
+        SharedPreferences sharedPreferences = getSharedPreferences("FirebaseUser", MODE_PRIVATE);
+        return sharedPreferences.getString("id", null);
+    }
 }

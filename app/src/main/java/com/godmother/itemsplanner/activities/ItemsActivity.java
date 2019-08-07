@@ -1,4 +1,4 @@
-package com.example.itemsplanner.activities;
+package com.godmother.itemsplanner.activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,22 +13,13 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.example.itemsplanner.R;
-import com.example.itemsplanner.models.Category;
-import com.example.itemsplanner.models.User;
+import com.godmother.itemsplanner.R;
+import com.godmother.itemsplanner.models.Item;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,133 +27,71 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class MainActivity extends AppCompatActivity {
-
+public class ItemsActivity extends AppCompatActivity {
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     TextView titleTextView;
     ImageButton burgerBtn;
 
-    FirebaseDatabase database;
-    DatabaseReference myRefToDatabase;
-
-    ArrayList<Category> categoriesList = new ArrayList<Category>();
-    ArrayAdapter<Category> adapter;
-
-    JSONObject categories = null;
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.menu_nav, menu);
-        return true;
-    }
+    ArrayList<Item> itemsList = new ArrayList<Item>();
+    ArrayAdapter<Item> adapter;
+    JSONObject items = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        FirebaseUser user = mAuth.getCurrentUser();
-        getDataForUser(user);
+        setupToolbarAndDrawer();
 
-        adapter = new ArrayAdapter<Category>(this, android.R.layout.simple_list_item_1, categoriesList);
+        adapter=new ArrayAdapter<Item>(this, android.R.layout.simple_list_item_1, itemsList);
         final ListView list = (ListView) findViewById(R.id.list);
         list.setAdapter(adapter);
-
-        database = FirebaseDatabase.getInstance();
-        myRefToDatabase = database.getReference("Categories");
-        myRefToDatabase.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()){
-                    Gson gson = new Gson();
-                    String gsonString = gson.toJson(dataSnapshot.getValue());
-                    categoriesList.clear();
+        String itemsString = (String) getIntent().getSerializableExtra("ITEMS_LIST");
+        if(itemsString != null) {
+            try {
+                items = new JSONObject(itemsString);
+                Iterator<String> iterator = items.keys();
+                while (iterator.hasNext()) {
+                    String key = iterator.next();
                     try {
-                        categories = new JSONObject(gsonString);
-                        Iterator<String> iterator = categories.keys();
-                        while (iterator.hasNext()) {
-                            String key = iterator.next();
-                            try {
-                                JSONObject category = new JSONObject(categories.get(key).toString());
-                                categoriesList.add(new Category(key, category.get("name").toString()));
-                            } catch (JSONException e) {
-                                // Something went wrong!
-                            }
-                        }
-                        adapter.notifyDataSetChanged();
+                        JSONObject item = new JSONObject(items.get(key).toString());
+                        itemsList.add(new Item(key, item.get("name").toString(),
+                                                item.get("descriere").toString()));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
+                adapter.notifyDataSetChanged();
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-            }
-        });
+        }
 
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
                 Intent nextActivity;
-                nextActivity = new Intent(getBaseContext(), ItemsActivity.class);
+                nextActivity = new Intent(getBaseContext(), ItemActivity.class);
 
-                Category selectedCategory = (Category) arg0.getItemAtPosition(position);
-                Iterator<String> iterator = categories.keys();
+                Item selectedItem = (Item) arg0.getItemAtPosition(position);
+                Iterator<String> iterator = items.keys();
                 while (iterator.hasNext()) {
                     String key = iterator.next();
-                    if(key.equals(selectedCategory.getId())){
+                    if(key.equals(selectedItem.getId())){
                         try {
-                            JSONObject category = new JSONObject(categories.get(key).toString());
-                            nextActivity.putExtra("ITEMS_LIST", category.get("items").toString());
-                            nextActivity.putExtra("CATEGORY_ID", key);
+                            JSONObject item = new JSONObject(items.get(key).toString());
+                            nextActivity.putExtra("ITEM", item.toString());
+                            nextActivity.putExtra("CATEGORY_ID", getIntent().getStringExtra("CATEGORY_ID"));
+                            nextActivity.putExtra("ITEM_ID", key);
                             break;
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
                     }
                 }
-                nextActivity.putExtra("CATEGORY_NAME", selectedCategory.getName());
+                nextActivity.putExtra("ITEM_NAME", selectedItem.getName());
                 startActivity(nextActivity);
-            }
-        });
-    }
-
-    private void getDataForUser(final FirebaseUser firebaseUser){
-        database = FirebaseDatabase.getInstance();
-        myRefToDatabase = database.getReference("Users").child(firebaseUser.getUid());
-
-        myRefToDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    User user = null;
-                    Gson gson = new Gson();
-                    String gsonString = gson.toJson(dataSnapshot.getValue());
-                    try {
-                        JSONObject userJson = new JSONObject(gsonString);
-                        user = new User(userJson.getString("name"), userJson.getString("phoneNumber"));
-                        user.setIsAdmin(userJson.getString("isAdmin"));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    SharedPreferences sharedPreferences = getSharedPreferences("FirebaseUser", MODE_PRIVATE);
-                    SharedPreferences.Editor ed = sharedPreferences.edit();
-                    ed.putString("id", firebaseUser.getUid());
-                    ed.putString("name", user.getName());
-                    ed.putString("email", firebaseUser.getEmail());
-                    ed.putString("phoneNumber",  user.getPhoneNumber());
-                    ed.putString("isAdmin",  user.getIsAdmin());
-                    ed.commit();
-                    setupToolbarAndDrawer();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
             }
         });
     }
@@ -241,6 +170,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         titleTextView = (TextView) findViewById(R.id.barTitle);
-        titleTextView.setText("Categorii");
+
+        String categorie = (String) getIntent().getStringExtra("CATEGORY_NAME");
+        titleTextView.setText("Iteme din categoria " + categorie);
     }
 }

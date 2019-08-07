@@ -1,4 +1,4 @@
-package com.example.itemsplanner.models;
+package com.godmother.itemsplanner.models;
 
 import java.text.DateFormat;
 import java.text.ParseException;

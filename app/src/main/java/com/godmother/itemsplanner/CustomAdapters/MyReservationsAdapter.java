@@ -1,4 +1,4 @@
-package com.example.itemsplanner.CustomAdapters;
+package com.godmother.itemsplanner.CustomAdapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,8 +9,8 @@ import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import com.example.itemsplanner.R;
-import com.example.itemsplanner.models.BookingWrapper;
+import com.godmother.itemsplanner.R;
+import com.godmother.itemsplanner.models.BookingWrapper;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;

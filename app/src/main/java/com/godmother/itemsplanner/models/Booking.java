@@ -1,4 +1,4 @@
-package com.example.itemsplanner.models;
+package com.godmother.itemsplanner.models;
 
 public class Booking {
     private String descriere;

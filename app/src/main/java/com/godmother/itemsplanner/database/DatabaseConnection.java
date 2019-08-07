@@ -1,4 +1,4 @@
-package com.example.itemsplanner.database;
+package com.godmother.itemsplanner.database;
 
 import androidx.annotation.NonNull;
 

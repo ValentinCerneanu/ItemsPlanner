@@ -1,4 +1,4 @@
-package com.example.itemsplanner.activities;
+package com.godmother.itemsplanner.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -24,9 +24,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.example.itemsplanner.R;
-import com.example.itemsplanner.models.Booking;
-import com.example.itemsplanner.models.Interval;
+import com.godmother.itemsplanner.R;
+import com.godmother.itemsplanner.models.Booking;
+import com.godmother.itemsplanner.models.Interval;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;

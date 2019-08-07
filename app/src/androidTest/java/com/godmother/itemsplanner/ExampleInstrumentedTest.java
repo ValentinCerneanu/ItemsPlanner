@@ -1,4 +1,4 @@
-package com.example.itemsplanner;
+package com.godmother.itemsplanner;
 
 import android.content.Context;
 import androidx.test.InstrumentationRegistry;

@@ -1,4 +1,4 @@
-package com.example.itemsplanner;
+package com.godmother.itemsplanner;
 
 import org.junit.Test;
 

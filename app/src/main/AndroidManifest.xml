@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.itemsplanner">
+    package="com.godmother.itemsplanner">
 
     <application
         android:allowBackup="true"
@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar">
         <activity
-            android:name=".activities.StartActivity"
+            android:name="com.godmother.itemsplanner.activities.StartActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -19,36 +19,36 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.MainActivity"
+            android:name="com.godmother.itemsplanner.activities.MainActivity"
             android:screenOrientation="portrait">
         </activity>
         <activity
-            android:name=".activities.LoginActivity"
+            android:name="com.godmother.itemsplanner.activities.LoginActivity"
             android:screenOrientation="portrait">
         </activity>
         <activity
-            android:name=".activities.RegisterActivity"
+            android:name="com.godmother.itemsplanner.activities.RegisterActivity"
             android:screenOrientation="portrait">
         </activity>
         <activity
-            android:name=".activities.ForgotPasswordActivity"
+            android:name="com.godmother.itemsplanner.activities.ForgotPasswordActivity"
             android:screenOrientation="portrait">
         </activity>
         <activity
-            android:name=".activities.ItemsActivity"
+            android:name="com.godmother.itemsplanner.activities.ItemsActivity"
             android:screenOrientation="portrait">
         </activity>
         <activity
-            android:name=".activities.ItemActivity"
+            android:name="com.godmother.itemsplanner.activities.ItemActivity"
             android:screenOrientation="portrait">
         </activity>
         <activity
-            android:name=".activities.MyItemsReservations"
+            android:name="com.godmother.itemsplanner.activities.MyItemsReservations"
             android:screenOrientation="portrait">
         </activity>
 
         <activity
-            android:name=".activities.AdminPanelActivity"
+            android:name="com.godmother.itemsplanner.activities.AdminPanelActivity"
             android:screenOrientation="portrait">
         </activity>
 
