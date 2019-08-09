@@ -136,9 +136,9 @@ public class ItemsActivity extends AppCompatActivity {
                         break;
                     }
 
-                    case R.id.nav_admin_panel: {
+                    case R.id.nav_admin_toate_rezervarile: {
                         Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), AdminPanelActivity.class);
+                        nextActivity = new Intent(getBaseContext(), AllBookingsAdminPanelActivity.class);
                         startActivity(nextActivity);
                         break;
                     }
@@ -158,7 +158,7 @@ public class ItemsActivity extends AppCompatActivity {
 
         Menu nav_Menu = navigationView.getMenu();
         if(sharedPreferences.getString("isAdmin", "").equals("false")){
-            nav_Menu.findItem(R.id.nav_admin_panel).setVisible(false);
+            nav_Menu.findItem(R.id.submenu_admin_panels).setVisible(false);
         }
 
         burgerBtn = (ImageButton) findViewById(R.id.hamburger_btn);

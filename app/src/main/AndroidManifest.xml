@@ -48,7 +48,12 @@
         </activity>
 
         <activity
-            android:name="com.godmother.itemsplanner.activities.AdminPanelActivity"
+            android:name="com.godmother.itemsplanner.activities.AllBookingsAdminPanelActivity"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <activity
+            android:name="com.godmother.itemsplanner.activities.CategoriesAdminPanelActivity"
             android:screenOrientation="portrait">
         </activity>
 
