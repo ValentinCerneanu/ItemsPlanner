@@ -99,6 +99,21 @@
                 android:text="Forgot password"
                 android:onClick="goToForgotPassword" />
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:orientation="vertical"
+                android:paddingTop="20dp">
+                <TextView
+                    android:id="@+id/privacy_policy"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Privacy Policy"
+                    android:gravity="center"
+                    android:textAppearance="?android:attr/textAppearanceSmall"/>
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

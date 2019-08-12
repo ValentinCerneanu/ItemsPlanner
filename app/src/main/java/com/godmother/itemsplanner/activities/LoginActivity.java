@@ -14,7 +14,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.text.Html;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -52,6 +55,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    TextView privacyPolicyTextView;
 
     public static Activity act;
 
@@ -60,6 +64,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onCreate(savedInstanceState);
         act = this;
         setContentView(R.layout.activity_login);
+
+        privacyPolicyTextView = (TextView)findViewById(R.id.privacy_policy);
+        Spanned text = Html.fromHtml("<a href='https://godmother-itemsplann.flycricket.io/privacy.html'>Privacy Policy</a>");
+        privacyPolicyTextView.setMovementMethod(LinkMovementMethod.getInstance());
+        privacyPolicyTextView.setText(text);
+
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
