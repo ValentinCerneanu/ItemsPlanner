@@ -10,17 +10,17 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import com.godmother.itemsplanner.R;
-import com.godmother.itemsplanner.models.Category;
+import com.godmother.itemsplanner.models.Item;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 
-public class MyCategoriesAdminPanelAdapter extends BaseAdapter implements ListAdapter {
-    private ArrayList<Category> list = new ArrayList<Category>();
+public class MyItemsAdminPanelAdapter extends BaseAdapter implements ListAdapter {
+    private ArrayList<Item> list = new ArrayList<Item>();
     private Context context;
     FirebaseDatabase database;
 
-    public MyCategoriesAdminPanelAdapter(ArrayList<Category> list, Context context) {
+    public MyItemsAdminPanelAdapter(ArrayList<Item> list, Context context) {
         this.list = list;
         this.context = context;
     }
@@ -61,14 +61,13 @@ public class MyCategoriesAdminPanelAdapter extends BaseAdapter implements ListAd
             @Override
             public void onClick(View v) {
                 database = FirebaseDatabase.getInstance();
-                String categoryId = list.get(position).getId();
-                database.getReference("Categories").child(categoryId).removeValue();
+                String itemId = list.get(position).getId();
+/*                database.getReference("Categories").child(categoryId).removeValue();
                 list.remove(position);
-                notifyDataSetChanged();
+                notifyDataSetChanged();*/
             }
         });
 
         return view;
     }
-
 }

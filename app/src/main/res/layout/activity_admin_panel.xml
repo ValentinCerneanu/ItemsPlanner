@@ -34,28 +34,32 @@
 
         </androidx.appcompat.widget.Toolbar>
 
+
         <ListView
             android:id="@+id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:clickable="false"
+            android:focusable="false"
+            android:descendantFocusability="blocksDescendants"
             android:background="#fff"/>
-        <FrameLayout
-            android:id="@+id/rootLayout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/addParkingSpaceBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|end"
-                android:layout_marginBottom="120dp"
-                android:layout_marginRight="5dp"
-                android:src="@drawable/ic_baseline_add"
-                app:backgroundTint="#000"/>
-        </FrameLayout>
+
 
     </LinearLayout>
 
+    <FrameLayout
+        android:id="@+id/rootLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/addBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginBottom="120dp"
+            android:layout_marginRight="5dp"
+            android:src="@drawable/ic_baseline_add" />
+    </FrameLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:layout_width="wrap_content"
@@ -64,20 +68,6 @@
         android:id="@+id/nav_view"
         app:headerLayout="@layout/drawer_header"
         app:menu="@menu/menu_nav">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="Copyright (c) SmartTech 2019" />
-        </LinearLayout>
     </com.google.android.material.navigation.NavigationView>
 
 </androidx.drawerlayout.widget.DrawerLayout>

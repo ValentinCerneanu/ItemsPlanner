@@ -1,5 +1,6 @@
 package com.godmother.itemsplanner.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -7,8 +8,6 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -16,8 +15,10 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.godmother.itemsplanner.CustomAdapters.MyItemsAdminPanelAdapter;
 import com.godmother.itemsplanner.R;
 import com.godmother.itemsplanner.models.Item;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -27,25 +28,35 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class ItemsActivity extends AppCompatActivity {
+public class ItemsAdminPanelActivity extends AppCompatActivity {
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     TextView titleTextView;
     ImageButton burgerBtn;
+    FloatingActionButton addNewItem;
 
     ArrayList<Item> itemsList = new ArrayList<Item>();
-    ArrayAdapter<Item> adapter;
+    MyItemsAdminPanelAdapter itemsAdminPanelAdapter;
+
     JSONObject items = null;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_nav, menu);
+        return true;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_admin_panel);
         setupToolbarAndDrawer();
 
-        adapter=new ArrayAdapter<Item>(this, android.R.layout.simple_list_item_1, itemsList);
         final ListView list = (ListView) findViewById(R.id.list);
-        list.setAdapter(adapter);
+        Context context = ItemsAdminPanelActivity.this;
+        itemsAdminPanelAdapter = new MyItemsAdminPanelAdapter(itemsList, context);
+        list.setAdapter(itemsAdminPanelAdapter);
+
         String itemsString = (String) getIntent().getSerializableExtra("ITEMS_LIST");
         if(itemsString != null) {
             try {
@@ -56,44 +67,29 @@ public class ItemsActivity extends AppCompatActivity {
                     try {
                         JSONObject item = new JSONObject(items.get(key).toString());
                         itemsList.add(new Item(key, item.get("name").toString(),
-                                                item.get("descriere").toString()));
+                                item.get("descriere").toString()));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
-                adapter.notifyDataSetChanged();
+                itemsAdminPanelAdapter.notifyDataSetChanged();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
 
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
+        addNewItem = findViewById(R.id.addBtn);
+        addNewItem.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+            public void onClick(View view) {
                 Intent nextActivity;
-                nextActivity = new Intent(getBaseContext(), ItemActivity.class);
-
-                Item selectedItem = (Item) arg0.getItemAtPosition(position);
-                Iterator<String> iterator = items.keys();
-                while (iterator.hasNext()) {
-                    String key = iterator.next();
-                    if(key.equals(selectedItem.getId())){
-                        try {
-                            JSONObject item = new JSONObject(items.get(key).toString());
-                            nextActivity.putExtra("ITEM", item.toString());
-                            nextActivity.putExtra("CATEGORY_ID", getIntent().getStringExtra("CATEGORY_ID"));
-                            nextActivity.putExtra("ITEM_ID", key);
-                            break;
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-                nextActivity.putExtra("ITEM_NAME", selectedItem.getName());
+                nextActivity = new Intent(getBaseContext(), AddNewItemActivity.class);
+                String categorie = (String) getIntent().getStringExtra("CATEGORY_NAME");
+                nextActivity.putExtra("CATEGORY_NAME", categorie);
                 startActivity(nextActivity);
             }
         });
+
     }
 
     private void setupToolbarAndDrawer(){
@@ -179,6 +175,6 @@ public class ItemsActivity extends AppCompatActivity {
         titleTextView = (TextView) findViewById(R.id.barTitle);
 
         String categorie = (String) getIntent().getStringExtra("CATEGORY_NAME");
-        titleTextView.setText("Iteme din categoria " + categorie);
+        titleTextView.setText("AdminPanel Iteme din categoria " + categorie);
     }
 }

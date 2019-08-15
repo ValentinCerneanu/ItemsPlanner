@@ -214,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     }
 
-                    case R.id.nav_admin_categorii: {
+                    case R.id.nav_admin_categorii_iteme: {
                         Intent nextActivity;
                         nextActivity = new Intent(getBaseContext(), CategoriesAdminPanelActivity.class);
                         startActivity(nextActivity);

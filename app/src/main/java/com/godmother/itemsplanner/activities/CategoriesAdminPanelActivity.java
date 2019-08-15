@@ -1,16 +1,21 @@
 package com.godmother.itemsplanner.activities;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.app.AlertDialog;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +24,9 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.godmother.itemsplanner.CustomAdapters.MyCategoriesAdminPanelAdapter;
 import com.godmother.itemsplanner.R;
 import com.godmother.itemsplanner.models.Category;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -40,6 +48,7 @@ public class CategoriesAdminPanelActivity extends AppCompatActivity {
     NavigationView navigationView;
     TextView titleTextView;
     ImageButton burgerBtn;
+    FloatingActionButton addNewCategory;
 
     FirebaseDatabase database;
     DatabaseReference myRefToDatabase;
@@ -67,6 +76,80 @@ public class CategoriesAdminPanelActivity extends AppCompatActivity {
 
         getCategories();
         setupToolbarAndDrawer();
+
+        addNewCategory = findViewById(R.id.addBtn);
+        addNewCategory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder builder = new AlertDialog.Builder((Context)CategoriesAdminPanelActivity.this);
+                builder.setTitle("Categorie Noua");
+                final EditText input = new EditText((Context)CategoriesAdminPanelActivity.this);
+                // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+                input.setInputType(InputType.TYPE_CLASS_TEXT);
+                builder.setView(input);
+
+                // Set up the buttons
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String newCategory = input.getText().toString();
+                        writeNewCategory(newCategory);
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                builder.show();
+            }
+        });
+
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+                Intent nextActivity;
+                nextActivity = new Intent(getBaseContext(), ItemsAdminPanelActivity.class);
+
+                Category selectedCategory = (Category) arg0.getItemAtPosition(position);
+                Iterator<String> iterator = categories.keys();
+                while (iterator.hasNext()) {
+                    String key = iterator.next();
+                    if(key.equals(selectedCategory.getId())){
+                        try {
+                            JSONObject category = new JSONObject(categories.get(key).toString());
+                            nextActivity.putExtra("ITEMS_LIST", category.get("items").toString());
+                            nextActivity.putExtra("CATEGORY_ID", key);
+                            break;
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                nextActivity.putExtra("CATEGORY_NAME", selectedCategory.getName());
+                startActivity(nextActivity);
+            }
+        });
+
+    }
+
+    public void writeNewCategory(String category){
+        database = FirebaseDatabase.getInstance();
+        myRefToDatabase = database.getReference("Categories");
+        myRefToDatabase.child(category).child("name").setValue(category)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                    }
+                });
     }
 
     private void getCategories() {
@@ -151,6 +234,13 @@ public class CategoriesAdminPanelActivity extends AppCompatActivity {
                         break;
                     }
 
+                    case R.id.nav_admin_categorii_iteme: {
+                        Intent nextActivity;
+                        nextActivity = new Intent(getBaseContext(), CategoriesAdminPanelActivity.class);
+                        startActivity(nextActivity);
+                        break;
+                    }
+
                     case R.id.nav_logout: {
                         FirebaseAuth.getInstance().signOut();
                         Intent nextActivity = new Intent(getBaseContext(), StartActivity.class);
@@ -178,7 +268,7 @@ public class CategoriesAdminPanelActivity extends AppCompatActivity {
         });
 
         titleTextView = (TextView) findViewById(R.id.barTitle);
-        titleTextView.setText("AdminPanel Toate Rezervarile");
+        titleTextView.setText("AdminPanel Categorii");
     }
 
 }

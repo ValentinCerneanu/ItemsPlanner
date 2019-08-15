@@ -215,6 +215,13 @@ public class AllBookingsAdminPanelActivity extends AppCompatActivity {
                         break;
                     }
 
+                    case R.id.nav_admin_categorii_iteme: {
+                        Intent nextActivity;
+                        nextActivity = new Intent(getBaseContext(), CategoriesAdminPanelActivity.class);
+                        startActivity(nextActivity);
+                        break;
+                    }
+
                     case R.id.nav_logout: {
                         FirebaseAuth.getInstance().signOut();
                         Intent nextActivity = new Intent(getBaseContext(), StartActivity.class);
@@ -242,7 +249,7 @@ public class AllBookingsAdminPanelActivity extends AppCompatActivity {
         });
 
         titleTextView = (TextView) findViewById(R.id.barTitle);
-        titleTextView.setText("AdminPanel Toate Rezervarile");
+        titleTextView.setText("AdminPanel Categorii");
     }
 
 }

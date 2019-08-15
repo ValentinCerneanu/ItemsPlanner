@@ -394,6 +394,13 @@ public class ItemActivity extends AppCompatActivity {
                         break;
                     }
 
+                    case R.id.nav_admin_categorii_iteme: {
+                        Intent nextActivity;
+                        nextActivity = new Intent(getBaseContext(), CategoriesAdminPanelActivity.class);
+                        startActivity(nextActivity);
+                        break;
+                    }
+
                     case R.id.nav_logout: {
                         FirebaseAuth.getInstance().signOut();
                         Intent nextActivity = new Intent(getBaseContext(), StartActivity.class);

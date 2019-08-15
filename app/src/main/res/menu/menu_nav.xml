@@ -20,13 +20,9 @@
                 android:icon="@drawable/ic_baseline_dashboard"
                 android:title="Toate Rezervarile" />
             <item
-                android:id="@+id/nav_admin_categorii"
+                android:id="@+id/nav_admin_categorii_iteme"
                 android:icon="@drawable/ic_baseline_dashboard"
-                android:title="Categorii" />
-            <item
-                android:id="@+id/nav_admin_iteme"
-                android:icon="@drawable/ic_baseline_dashboard"
-                android:title="Iteme" />
+                android:title="Categorii si Iteme" />
         </menu>
     </item>
 
