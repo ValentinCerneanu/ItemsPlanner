@@ -63,7 +63,7 @@ public class MyCategoriesAdminPanelAdapter extends BaseAdapter implements ListAd
         View view = convertView;
         if (view == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = inflater.inflate(R.layout.my_reservations_adapter_layout, null);
+            view = inflater.inflate(R.layout.admin_panel_adapter_layout, null);
         }
 
         TextView bookingView= (TextView)view.findViewById(R.id.bookingView);
