@@ -85,7 +85,7 @@ public class CategoriesAdminPanelActivity extends AppCompatActivity {
                 builder.setTitle("Categorie Noua");
                 final EditText input = new EditText((Context)CategoriesAdminPanelActivity.this);
                 // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-                input.setInputType(InputType.TYPE_CLASS_TEXT);
+                input.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
                 builder.setView(input);
 
                 // Set up the buttons

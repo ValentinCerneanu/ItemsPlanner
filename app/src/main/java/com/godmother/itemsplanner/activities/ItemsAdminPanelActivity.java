@@ -54,7 +54,8 @@ public class ItemsAdminPanelActivity extends AppCompatActivity {
 
         final ListView list = (ListView) findViewById(R.id.list);
         Context context = ItemsAdminPanelActivity.this;
-        itemsAdminPanelAdapter = new MyItemsAdminPanelAdapter(itemsList, context);
+        String categorie = (String) getIntent().getStringExtra("CATEGORY_NAME");
+        itemsAdminPanelAdapter = new MyItemsAdminPanelAdapter(itemsList, categorie, context);
         list.setAdapter(itemsAdminPanelAdapter);
 
         String itemsString = (String) getIntent().getSerializableExtra("ITEMS_LIST");
