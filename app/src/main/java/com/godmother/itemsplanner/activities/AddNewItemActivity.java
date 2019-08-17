@@ -25,6 +25,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.godmother.itemsplanner.R;
 import com.godmother.itemsplanner.models.Image;
+import com.godmother.itemsplanner.models.ImageUpload;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -36,8 +37,11 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.synnapps.carouselview.CarouselView;
+import com.synnapps.carouselview.ImageListener;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class AddNewItemActivity extends AppCompatActivity {
@@ -46,16 +50,17 @@ public class AddNewItemActivity extends AppCompatActivity {
     TextView titleTextView;
     ImageButton burgerBtn;
     Button choosePhoto;
-    private Uri filePath;
     Button newItem;
-    ImageView imageView;
     EditText numeItem;
     EditText descriereItem;
+    CarouselView carouselView;
 
     FirebaseStorage storage;
     StorageReference storageReference;
     FirebaseDatabase database;
     DatabaseReference myRefToDatabase;
+
+    ArrayList<ImageUpload> imageUploads = new ArrayList<ImageUpload>();
 
     private final int PICK_IMAGE_REQUEST = 71;
 
@@ -78,8 +83,7 @@ public class AddNewItemActivity extends AppCompatActivity {
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
 
-        //
-        imageView = (ImageView) findViewById(R.id.imgView);
+        carouselView = (CarouselView) findViewById(R.id.carouselViewAdminPanel);
 
         newItem = findViewById(R.id.add_new_item);
         newItem.setOnClickListener(new View.OnClickListener() {
@@ -112,10 +116,14 @@ public class AddNewItemActivity extends AppCompatActivity {
         if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK
                 && data != null && data.getData() != null )
         {
+            Uri filePath;
             filePath = data.getData();
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
-                imageView.setImageBitmap(bitmap);
+                imageUploads.add(new ImageUpload(filePath, bitmap));
+
+                carouselView.setImageListener(imageListener);
+                carouselView.setPageCount(imageUploads.size());
             }
             catch (IOException e)
             {
@@ -123,6 +131,15 @@ public class AddNewItemActivity extends AppCompatActivity {
             }
         }
     }
+
+    ImageListener imageListener = new ImageListener() {
+        @Override
+        public void setImageForPosition(int position, ImageView imageView) {
+            //imageView.setImageResource(sampleImages[position]);
+            if(imageUploads.get(position).getBitmap() != null)
+                imageView.setImageBitmap(imageUploads.get(position).getBitmap());
+        }
+    };
 
     private void addNewItem(){
         boolean cancel = false;
@@ -142,11 +159,11 @@ public class AddNewItemActivity extends AppCompatActivity {
         if(cancel) {
             focusView.requestFocus();
         } else {
-            uploadImage();
+            uploadImages();
         }
     }
 
-    private void writeToDatabase(Image image){
+    private String writeToDatabase(){
         String categorie = (String) getIntent().getStringExtra("CATEGORY_NAME");
         myRefToDatabase = database.getReference("Categories");
         myRefToDatabase = myRefToDatabase.push();
@@ -154,61 +171,71 @@ public class AddNewItemActivity extends AppCompatActivity {
         myRefToDatabase = database.getReference("Categories");
         myRefToDatabase.child(categorie).child("items").child(itemGeneratedId).child("name").setValue(numeItem.getText().toString());
         myRefToDatabase.child(categorie).child("items").child(itemGeneratedId).child("descriere").setValue(descriereItem.getText().toString());
+        return itemGeneratedId;
+    }
+
+    private void writeImageInfoToDatabase(Image image, String itemGeneratedId){
+        String categorie = (String) getIntent().getStringExtra("CATEGORY_NAME");
         myRefToDatabase = myRefToDatabase.push();
         String imageGeneratedId = myRefToDatabase.getKey();
         myRefToDatabase = database.getReference("Categories");
         myRefToDatabase.child(categorie).child("items").child(itemGeneratedId).child("images").child(imageGeneratedId).setValue(image);
+
     }
 
-    private void uploadImage() {
+    private void uploadImages() {
+        final String itemId = writeToDatabase();
 
-        if(filePath != null)
-        {
-            final ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setTitle("Uploading...");
-            progressDialog.show();
-            final String uuid = UUID.randomUUID().toString();
-            final String[] downloadUrl = {null};
+        for(ImageUpload imageUpload  : imageUploads) {
+            if(imageUpload.getFilePath() != null)
+            {
+                final ProgressDialog progressDialog = new ProgressDialog(this);
+                progressDialog.setTitle("Uploading...");
+                progressDialog.show();
+                final String uuid = UUID.randomUUID().toString();
+                final String[] downloadUrl = {null};
 
-            StorageReference ref = storageReference.child("images/" + uuid);
-            try {
+                StorageReference ref = storageReference.child("images/" + uuid);
+                try {
 
-                ref.putFile(filePath)
-                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                            @Override
-                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                Task<Uri> result = taskSnapshot.getStorage().getDownloadUrl();
-                                result.addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        downloadUrl[0] = uri.toString();
-                                        writeToDatabase(new Image(uuid, downloadUrl[0]));
-                                    }
-                                });
-                                progressDialog.dismiss();
-                                Toast.makeText(AddNewItemActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                progressDialog.dismiss();
-                                Toast.makeText(AddNewItemActivity.this, "Failed " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                        })
-                        .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                            @Override
-                            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                                double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot
-                                        .getTotalByteCount());
-                                progressDialog.setMessage("Uploaded " + (int) progress + "%");
-                            }
-                        });
-            }
-            catch(Exception e){
-                e.printStackTrace();
+                    ref.putFile(imageUpload.getFilePath())
+                            .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                    Task<Uri> result = taskSnapshot.getStorage().getDownloadUrl();
+                                    result.addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            downloadUrl[0] = uri.toString();
+                                            writeImageInfoToDatabase(new Image(uuid, downloadUrl[0]), itemId);
+                                        }
+                                    });
+                                    progressDialog.dismiss();
+                                    Toast.makeText(AddNewItemActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    progressDialog.dismiss();
+                                    Toast.makeText(AddNewItemActivity.this, "Failed " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                            .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                                    double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot
+                                            .getTotalByteCount());
+                                    progressDialog.setMessage("Uploaded " + (int) progress + "%");
+                                }
+                            });
+                }
+                catch(Exception e){
+                    e.printStackTrace();
+                }
             }
         }
+
     }
 
     private void setupToolbarAndDrawer(){
