@@ -1,6 +1,8 @@
 package com.godmother.itemsplanner.CustomAdapters;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,8 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import com.godmother.itemsplanner.R;
+import com.godmother.itemsplanner.activities.ItemActivity;
+import com.godmother.itemsplanner.activities.MyItemsReservations;
 import com.godmother.itemsplanner.models.BookingWrapper;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -60,16 +64,27 @@ public class MyReservationsAdapter extends BaseAdapter implements ListAdapter {
         deleteBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                database = FirebaseDatabase.getInstance();
-                String bookingId = list.get(position).getBooking().getBookingId();
-                String itemId = list.get(position).getBooking().getItemId();
-                String categoryId = list.get(position).getBooking().getCategoryId();
-                String userId = list.get(position).getBooking().getUser();
-                database.getReference("Bookings").child(bookingId).removeValue();
-                database.getReference("Users").child(userId).child("bookings").child(bookingId).removeValue();
-                database.getReference("Categories").child(categoryId).child("items").child(itemId).child("bookings").child(bookingId).removeValue();
-                list.remove(position);
-                notifyDataSetChanged();
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("Confirmare stergere");
+                builder.setMessage("Esti sigur ca vrei sa stergi aceasta rezervare?");
+                builder.setPositiveButton("Da", new    DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        database = FirebaseDatabase.getInstance();
+                        String bookingId = list.get(position).getBooking().getBookingId();
+                        String itemId = list.get(position).getBooking().getItemId();
+                        String categoryId = list.get(position).getBooking().getCategoryId();
+                        String userId = list.get(position).getBooking().getUser();
+                        database.getReference("Bookings").child(bookingId).removeValue();
+                        database.getReference("Users").child(userId).child("bookings").child(bookingId).removeValue();
+                        database.getReference("Categories").child(categoryId).child("items").child(itemId).child("bookings").child(bookingId).removeValue();
+                        list.remove(position);
+                        notifyDataSetChanged();
+                    }
+                });
+                builder.setNegativeButton("Nu", null);
+                AlertDialog dialog = builder.create();
+                dialog.show();
             }
         });
 
