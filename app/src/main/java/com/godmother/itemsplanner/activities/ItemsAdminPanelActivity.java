@@ -12,6 +12,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -21,6 +22,12 @@ import com.godmother.itemsplanner.models.Item;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,32 +59,13 @@ public class ItemsAdminPanelActivity extends AppCompatActivity {
         setContentView(R.layout.activity_admin_panel);
         setupToolbarAndDrawer();
 
+        String categorie = (String) getIntent().getStringExtra("CATEGORY_NAME");
+        getItems(categorie);
+
         final ListView list = (ListView) findViewById(R.id.list);
         Context context = ItemsAdminPanelActivity.this;
-        String categorie = (String) getIntent().getStringExtra("CATEGORY_NAME");
         itemsAdminPanelAdapter = new MyItemsAdminPanelAdapter(itemsList, categorie, context);
         list.setAdapter(itemsAdminPanelAdapter);
-
-        String itemsString = (String) getIntent().getSerializableExtra("ITEMS_LIST");
-        if(itemsString != null) {
-            try {
-                items = new JSONObject(itemsString);
-                Iterator<String> iterator = items.keys();
-                while (iterator.hasNext()) {
-                    String key = iterator.next();
-                    try {
-                        JSONObject item = new JSONObject(items.get(key).toString());
-                        itemsList.add(new Item(key, item.get("name").toString(),
-                                item.get("descriere").toString()));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-                itemsAdminPanelAdapter.notifyDataSetChanged();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
 
         addNewItem = findViewById(R.id.addBtn);
         addNewItem.setOnClickListener(new View.OnClickListener() {
@@ -91,6 +79,44 @@ public class ItemsAdminPanelActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void getItems(String categorie) {
+        FirebaseDatabase database;
+        DatabaseReference myRefToDatabase;
+        database = FirebaseDatabase.getInstance();
+        myRefToDatabase = database.getReference("Categories").child(categorie).child("items");
+        myRefToDatabase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()){
+                    Gson gson = new Gson();
+                    String gsonString = gson.toJson(dataSnapshot.getValue());
+                    itemsList.clear();
+                    try {
+                        items = new JSONObject(gsonString);
+                        Iterator<String> iterator = items.keys();
+                        while (iterator.hasNext()) {
+                            String key = iterator.next();
+                            try {
+                                JSONObject item = new JSONObject(items.get(key).toString());
+                                itemsList.add(new Item(key, item.get("name").toString(),
+                                        item.get("descriere").toString()));
+                            } catch (JSONException e) {
+                                // Something went wrong!
+                            }
+                        }
+                        itemsAdminPanelAdapter.notifyDataSetChanged();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
     }
 
     private void setupToolbarAndDrawer(){

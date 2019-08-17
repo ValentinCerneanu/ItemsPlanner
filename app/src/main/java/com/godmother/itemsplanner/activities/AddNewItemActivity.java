@@ -1,5 +1,6 @@
 package com.godmother.itemsplanner.activities;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -235,7 +236,7 @@ public class AddNewItemActivity extends AppCompatActivity {
                 }
             }
         }
-
+        finish();
     }
 
     private void setupToolbarAndDrawer(){

@@ -120,7 +120,6 @@ public class CategoriesAdminPanelActivity extends AppCompatActivity {
                     if(key.equals(selectedCategory.getId())){
                         try {
                             JSONObject category = new JSONObject(categories.get(key).toString());
-                            nextActivity.putExtra("ITEMS_LIST", category.get("items").toString());
                             nextActivity.putExtra("CATEGORY_ID", key);
                             break;
                         } catch (JSONException e) {
