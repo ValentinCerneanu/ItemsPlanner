@@ -2,6 +2,7 @@ package com.godmother.itemsplanner.activities;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -39,6 +40,7 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.synnapps.carouselview.CarouselView;
+import com.synnapps.carouselview.ImageClickListener;
 import com.synnapps.carouselview.ImageListener;
 
 import java.io.IOException;
@@ -85,6 +87,7 @@ public class AddNewItemActivity extends AppCompatActivity {
         storageReference = storage.getReference();
 
         carouselView = (CarouselView) findViewById(R.id.carouselViewAdminPanel);
+        carouselView.setImageClickListener(imageClickListener);
 
         newItem = findViewById(R.id.add_new_item);
         newItem.setOnClickListener(new View.OnClickListener() {
@@ -103,6 +106,33 @@ public class AddNewItemActivity extends AppCompatActivity {
         });
 
     }
+    ImageClickListener imageClickListener = new ImageClickListener() {
+        @Override
+        public void onClick(final int position) {
+            if(imageUploads.size() > 1) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(AddNewItemActivity.this);
+                builder.setTitle("Anulare adaugare poza");
+                builder.setMessage("Vrei sa anulezi adaugarea acestei poze?");
+                builder.setPositiveButton("Da", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        imageUploads.remove(position);
+
+                        carouselView.setImageListener(imageListener);
+                        carouselView.setPageCount(imageUploads.size());
+                    }
+                });
+                builder.setNegativeButton("Nu", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        }
+    };
 
     private void chooseImage() {
         Intent intent = new Intent();
