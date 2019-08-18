@@ -292,10 +292,6 @@ public class AddNewItemActivity extends AppCompatActivity {
             // This method will trigger on item Click of navigation menu
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
-                if (menuItem.isChecked())
-                    menuItem.setChecked(false);
-                else
-                    menuItem.setChecked(true);
                 //Closing drawer on item click
                 drawerLayout.closeDrawers();
                 switch (menuItem.getItemId()) {
@@ -306,10 +302,12 @@ public class AddNewItemActivity extends AppCompatActivity {
                         finishAffinity();
                         break;
                     }
+
                     case R.id.nav_my_items_reservations: {
                         Intent nextActivity;
                         nextActivity = new Intent(getBaseContext(), MyItemsReservations.class);
                         startActivity(nextActivity);
+                        finishAffinity();
                         break;
                     }
 
@@ -317,6 +315,7 @@ public class AddNewItemActivity extends AppCompatActivity {
                         Intent nextActivity;
                         nextActivity = new Intent(getBaseContext(), AllBookingsAdminPanelActivity.class);
                         startActivity(nextActivity);
+                        finishAffinity();
                         break;
                     }
 
@@ -324,6 +323,7 @@ public class AddNewItemActivity extends AppCompatActivity {
                         Intent nextActivity;
                         nextActivity = new Intent(getBaseContext(), CategoriesAdminPanelActivity.class);
                         startActivity(nextActivity);
+                        finishAffinity();
                         break;
                     }
 

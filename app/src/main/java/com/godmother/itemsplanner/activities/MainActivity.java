@@ -187,20 +187,13 @@ public class MainActivity extends AppCompatActivity {
             // This method will trigger on item Click of navigation menu
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
-                if (menuItem.isChecked())
-                    menuItem.setChecked(false);
-                else
-                    menuItem.setChecked(true);
                 //Closing drawer on item click
                 drawerLayout.closeDrawers();
                 switch (menuItem.getItemId()) {
                     case R.id.nav_home: {
-                        Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), MainActivity.class);
-                        startActivity(nextActivity);
-                        finishAffinity();
                         break;
                     }
+
                     case R.id.nav_my_items_reservations: {
                         Intent nextActivity;
                         nextActivity = new Intent(getBaseContext(), MyItemsReservations.class);
