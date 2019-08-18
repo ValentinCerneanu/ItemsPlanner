@@ -3,6 +3,7 @@ package com.godmother.itemsplanner.CustomAdapters;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.godmother.itemsplanner.R;
+import com.godmother.itemsplanner.activities.EditItemActivity;
+import com.godmother.itemsplanner.activities.MyItemsReservations;
 import com.godmother.itemsplanner.models.Item;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -70,6 +73,20 @@ public class MyItemsAdminPanelAdapter extends BaseAdapter implements ListAdapter
 
         TextView bookingView= (TextView)view.findViewById(R.id.bookingView);
         bookingView.setText(list.get(position).toString());
+
+        ImageButton editBtn= (ImageButton)view.findViewById(R.id.editBtn);
+
+        editBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Intent nextActivity;
+                nextActivity = new Intent(context, EditItemActivity.class);
+                final String itemId = list.get(position).getId();
+                nextActivity.putExtra("ITEM_ID", itemId);
+                nextActivity.putExtra("CATEGORY_ID", categoryId);
+                context.startActivity(nextActivity);
+            }
+        });
 
         ImageButton deleteBtn= (ImageButton)view.findViewById(R.id.deleteBtn);
 

@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -33,21 +34,31 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.google.gson.Gson;
 import com.synnapps.carouselview.CarouselView;
 import com.synnapps.carouselview.ImageClickListener;
 import com.synnapps.carouselview.ImageListener;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.UUID;
 
-public class AddNewItemActivity extends AppCompatActivity {
+public class EditItemActivity  extends AppCompatActivity {
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     TextView titleTextView;
@@ -64,6 +75,8 @@ public class AddNewItemActivity extends AppCompatActivity {
     DatabaseReference myRefToDatabase;
 
     ArrayList<ImageUpload> imageUploads = new ArrayList<ImageUpload>();
+    String categoryId;
+    String itemId;
 
     private final int PICK_IMAGE_REQUEST = 71;
 
@@ -105,14 +118,96 @@ public class AddNewItemActivity extends AppCompatActivity {
             }
         });
 
+        categoryId = getIntent().getStringExtra("CATEGORY_ID");
+        itemId = getIntent().getStringExtra("ITEM_ID");
+
+        myRefToDatabase = database.getReference("Categories").child(categoryId).child("items").child(itemId);
+        myRefToDatabase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    Gson gson = new Gson();
+                    String gsonString = gson.toJson(dataSnapshot.getValue());
+                    try {
+                        JSONObject item = new JSONObject(gsonString);
+                        getImages(item);
+                        try {
+                            numeItem.setText(item.getString("name"));
+                            descriereItem.setText(item.getString("descriere"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
     }
+
+    private void getImages(JSONObject item){
+        String images;
+        if(item.has("images")) {
+            try {
+                images = item.getString("images");
+                JSONObject imagesJson = new JSONObject(images);
+                Iterator<String> iterator = imagesJson.keys();
+                while (iterator.hasNext()) {
+                    String key = iterator.next();
+                    try {
+                        JSONObject image = new JSONObject(imagesJson.get(key).toString());
+                        String url = image.get("url").toString();
+                        String uid = image.get("uid").toString();
+                        getImage(uid);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void getImage(String uid) {
+        final File localFile;
+        try {
+            StorageReference storageReference = storage.getReference();
+            storageReference = storageReference.child("images/" + uid);
+            localFile = File.createTempFile("image" + uid, "jpg");
+            storageReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                    // Local temp file has been created
+                    imageUploads.add(new ImageUpload(null, BitmapFactory.decodeFile(localFile.getAbsolutePath())));
+                    carouselView.setImageListener(imageListener);
+                    carouselView.setPageCount(imageUploads.size());
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle any errors
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     ImageClickListener imageClickListener = new ImageClickListener() {
         @Override
         public void onClick(final int position) {
             if(imageUploads.size() > 1) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(AddNewItemActivity.this);
-                builder.setTitle("Anulare adaugare poza");
-                builder.setMessage("Vrei sa anulezi adaugarea acestei poze?");
+                AlertDialog.Builder builder = new AlertDialog.Builder(EditItemActivity.this);
+                builder.setTitle("Stergere poza");
+                builder.setMessage("Vrei sa stergi aceasta poza?");
                 builder.setPositiveButton("Da", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -193,15 +288,12 @@ public class AddNewItemActivity extends AppCompatActivity {
         }
     }
 
-    private String writeToDatabase(){
+    private void writeToDatabase(){
         String categoryId = (String) getIntent().getStringExtra("CATEGORY_ID");
         myRefToDatabase = database.getReference("Categories");
-        myRefToDatabase = myRefToDatabase.push();
-        String itemGeneratedId = myRefToDatabase.getKey();
         myRefToDatabase = database.getReference("Categories");
-        myRefToDatabase.child(categoryId).child("items").child(itemGeneratedId).child("name").setValue(numeItem.getText().toString());
-        myRefToDatabase.child(categoryId).child("items").child(itemGeneratedId).child("descriere").setValue(descriereItem.getText().toString());
-        return itemGeneratedId;
+        myRefToDatabase.child(categoryId).child("items").child(itemId).child("name").setValue(numeItem.getText().toString());
+        myRefToDatabase.child(categoryId).child("items").child(itemId).child("descriere").setValue(descriereItem.getText().toString());
     }
 
     private void writeImageInfoToDatabase(Image image, String itemGeneratedId){
@@ -210,13 +302,11 @@ public class AddNewItemActivity extends AppCompatActivity {
         String imageGeneratedId = myRefToDatabase.getKey();
         myRefToDatabase = database.getReference("Categories");
         myRefToDatabase.child(categoryId).child("items").child(itemGeneratedId).child("images").child(imageGeneratedId).setValue(image);
-
     }
 
     private void uploadImages() {
-        final String itemId = writeToDatabase();
+        writeToDatabase();
         boolean hasNewImages = false;
-
         for(ImageUpload imageUpload  : imageUploads) {
             if(imageUpload.getFilePath() != null)
             {
@@ -243,7 +333,7 @@ public class AddNewItemActivity extends AppCompatActivity {
                                         }
                                     });
                                     progressDialog.dismiss();
-                                    Toast.makeText(AddNewItemActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(EditItemActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();
                                     finish();
                                 }
                             })
@@ -251,7 +341,7 @@ public class AddNewItemActivity extends AppCompatActivity {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
                                     progressDialog.dismiss();
-                                    Toast.makeText(AddNewItemActivity.this, "Failed " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(EditItemActivity.this, "Failed " + e.getMessage(), Toast.LENGTH_SHORT).show();
                                 }
                             })
                             .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
@@ -355,6 +445,6 @@ public class AddNewItemActivity extends AppCompatActivity {
 
         titleTextView = (TextView) findViewById(R.id.barTitle);
 
-        titleTextView.setText("AdminPanel Adauga Item ");
+        titleTextView.setText("AdminPanel Editeaza Item ");
     }
 }

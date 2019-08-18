@@ -226,7 +226,6 @@ public class ItemActivity extends AppCompatActivity {
     ImageListener imageListener = new ImageListener() {
         @Override
         public void setImageForPosition(int position, ImageView imageView) {
-            //imageView.setImageResource(sampleImages[position]);
             if(bitmaps.get(position) != null)
                 imageView.setImageBitmap(bitmaps.get(position));
         }
