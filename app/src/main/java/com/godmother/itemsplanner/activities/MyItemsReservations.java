@@ -151,7 +151,8 @@ public class MyItemsReservations extends AppCompatActivity {
                                                   bookingJSONObj.get("user").toString(),
                                                   bookingJSONObj.get("itemName").toString(),
                                                   bookingJSONObj.get("itemId").toString(),
-                                                  bookingJSONObj.get("categoryId").toString());
+                                                  bookingJSONObj.get("categoryId").toString(),
+                                                  bookingJSONObj.get("categoryName").toString());
                     booking.setBookingId(key);
                     BookingWrapper bookingWrapper = new BookingWrapper(booking, interval);
                     bookingsList.add(bookingWrapper);

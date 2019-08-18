@@ -84,6 +84,7 @@ public class ItemsActivity extends AppCompatActivity {
                             nextActivity.putExtra("ITEM", item.toString());
                             nextActivity.putExtra("CATEGORY_ID", getIntent().getStringExtra("CATEGORY_ID"));
                             nextActivity.putExtra("ITEM_ID", key);
+                            nextActivity.putExtra("CATEGORY_NAME", getIntent().getStringExtra("CATEGORY_NAME"));
                             break;
                         } catch (JSONException e) {
                             e.printStackTrace();

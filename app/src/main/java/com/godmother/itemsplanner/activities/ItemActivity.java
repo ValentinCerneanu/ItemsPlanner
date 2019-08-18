@@ -170,10 +170,9 @@ public class ItemActivity extends AppCompatActivity {
                     if(conflictBooking == null){
                         Date from = intervalSelectat.get(0);
                         Date till = intervalSelectat.get(intervalSelectat.size() - 1);
-                        Booking booking = null;
-                        booking = new Booking(scopRezervare.getText().toString(), getUserId(),
+                        Booking booking = new Booking(scopRezervare.getText().toString(), getUserId(),
                                 (String) getIntent().getStringExtra("ITEM_NAME"), itemId,
-                                getIntent().getStringExtra("CATEGORY_ID"));
+                                getIntent().getStringExtra("CATEGORY_ID"), getIntent().getStringExtra("CATEGORY_NAME"));
                         Interval interval = new Interval(from, till);
                         writeNewBooking(booking, interval);
                     } else {
@@ -235,25 +234,26 @@ public class ItemActivity extends AppCompatActivity {
 
     private void getImages(){
         String images;
-        try {
-            images =  item.getString("images");
-            JSONObject imagesJson = new JSONObject(images);
-            Iterator<String> iterator = imagesJson.keys();
-            while (iterator.hasNext()) {
-                String key = iterator.next();
-                try {
-                    JSONObject image = new JSONObject(imagesJson.get(key).toString());
-                    String url = image.get("url").toString();
-                    String uid = image.get("uid").toString();
-                    getImage(uid);
-                } catch (JSONException e) {
-                    e.printStackTrace();
+        if(item.has("images")) {
+            try {
+                images = item.getString("images");
+                JSONObject imagesJson = new JSONObject(images);
+                Iterator<String> iterator = imagesJson.keys();
+                while (iterator.hasNext()) {
+                    String key = iterator.next();
+                    try {
+                        JSONObject image = new JSONObject(imagesJson.get(key).toString());
+                        String url = image.get("url").toString();
+                        String uid = image.get("uid").toString();
+                        getImage(uid);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-
     }
 
     private void getImage(String uid) {

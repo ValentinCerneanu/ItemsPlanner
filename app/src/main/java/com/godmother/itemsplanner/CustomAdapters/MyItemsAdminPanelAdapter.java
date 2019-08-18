@@ -33,14 +33,14 @@ import java.util.Iterator;
 public class MyItemsAdminPanelAdapter extends BaseAdapter implements ListAdapter {
     private ArrayList<Item> list = new ArrayList<Item>();
     private Context context;
-    private String categorie;
+    private String categoryId;
 
     FirebaseDatabase database;
 
-    public MyItemsAdminPanelAdapter(ArrayList<Item> list, String categorie, Context context) {
+    public MyItemsAdminPanelAdapter(ArrayList<Item> list, String categoryId, Context context) {
         this.list = list;
         this.context = context;
-        this.categorie = categorie;
+        this.categoryId = categoryId;
     }
 
     @Override
@@ -85,7 +85,7 @@ public class MyItemsAdminPanelAdapter extends BaseAdapter implements ListAdapter
                         final String itemId = list.get(position).getId();
 
                         database = FirebaseDatabase.getInstance();
-                        DatabaseReference myRefToDatabase = database.getReference("Categories").child(categorie).child("items").child(itemId);
+                        DatabaseReference myRefToDatabase = database.getReference("Categories").child(categoryId).child("items").child(itemId);
                         myRefToDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -183,7 +183,7 @@ public class MyItemsAdminPanelAdapter extends BaseAdapter implements ListAdapter
     }
 
     private void deleteItem(String itemId){
-        DatabaseReference refForDeleting = database.getReference("Categories").child(categorie).child("items").child(itemId);
+        DatabaseReference refForDeleting = database.getReference("Categories").child(categoryId).child("items").child(itemId);
         refForDeleting.removeValue().addOnSuccessListener(new OnSuccessListener() {
             @Override
             public void onSuccess(Object o) {

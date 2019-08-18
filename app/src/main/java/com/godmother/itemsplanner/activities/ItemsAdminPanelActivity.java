@@ -59,12 +59,12 @@ public class ItemsAdminPanelActivity extends AppCompatActivity {
         setContentView(R.layout.activity_admin_panel);
         setupToolbarAndDrawer();
 
-        String categorie = (String) getIntent().getStringExtra("CATEGORY_NAME");
-        getItems(categorie);
+        String categoryId = (String) getIntent().getStringExtra("CATEGORY_ID");
+        getItems(categoryId);
 
         final ListView list = (ListView) findViewById(R.id.list);
         Context context = ItemsAdminPanelActivity.this;
-        itemsAdminPanelAdapter = new MyItemsAdminPanelAdapter(itemsList, categorie, context);
+        itemsAdminPanelAdapter = new MyItemsAdminPanelAdapter(itemsList, categoryId, context);
         list.setAdapter(itemsAdminPanelAdapter);
 
         addNewItem = findViewById(R.id.addBtn);
@@ -73,19 +73,19 @@ public class ItemsAdminPanelActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent nextActivity;
                 nextActivity = new Intent(getBaseContext(), AddNewItemActivity.class);
-                String categorie = (String) getIntent().getStringExtra("CATEGORY_NAME");
-                nextActivity.putExtra("CATEGORY_NAME", categorie);
+                String categoryId = (String) getIntent().getStringExtra("CATEGORY_ID");
+                nextActivity.putExtra("CATEGORY_ID", categoryId);
                 startActivity(nextActivity);
             }
         });
 
     }
 
-    private void getItems(String categorie) {
+    private void getItems(String categoryId) {
         FirebaseDatabase database;
         DatabaseReference myRefToDatabase;
         database = FirebaseDatabase.getInstance();
-        myRefToDatabase = database.getReference("Categories").child(categorie).child("items");
+        myRefToDatabase = database.getReference("Categories").child(categoryId).child("items");
         myRefToDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -202,6 +202,6 @@ public class ItemsAdminPanelActivity extends AppCompatActivity {
         titleTextView = (TextView) findViewById(R.id.barTitle);
 
         String categorie = (String) getIntent().getStringExtra("CATEGORY_NAME");
-        titleTextView.setText("AdminPanel Iteme din categoria " + categorie);
+        titleTextView.setText("AdminPanel \nIteme " + categorie);
     }
 }

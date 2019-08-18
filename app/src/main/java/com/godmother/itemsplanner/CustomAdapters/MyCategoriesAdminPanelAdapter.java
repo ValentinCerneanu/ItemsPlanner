@@ -3,10 +3,12 @@ package com.godmother.itemsplanner.CustomAdapters;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.TextView;
@@ -14,7 +16,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.godmother.itemsplanner.R;
+import com.godmother.itemsplanner.activities.CategoriesAdminPanelActivity;
 import com.godmother.itemsplanner.models.Category;
+import com.godmother.itemsplanner.models.Item;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -23,6 +27,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,6 +74,40 @@ public class MyCategoriesAdminPanelAdapter extends BaseAdapter implements ListAd
         TextView bookingView= (TextView)view.findViewById(R.id.bookingView);
         bookingView.setText(list.get(position).toString());
 
+        ImageButton editBtn= (ImageButton)view.findViewById(R.id.editBtn);
+
+        editBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("Editeaza Categoria");
+                final EditText input = new EditText(context);
+                // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+                final String categoryId = list.get(position).getId();
+                final String oldCategoryName = list.get(position).getName();
+                input.setText(oldCategoryName);
+                input.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+                builder.setView(input);
+
+                // Set up the buttons
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String editedCategory = input.getText().toString();
+                        editCategory(categoryId, oldCategoryName, editedCategory);
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                builder.show();
+            }
+        });
+
         ImageButton deleteBtn= (ImageButton)view.findViewById(R.id.deleteBtn);
 
         deleteBtn.setOnClickListener(new View.OnClickListener(){
@@ -94,6 +133,43 @@ public class MyCategoriesAdminPanelAdapter extends BaseAdapter implements ListAd
         });
 
         return view;
+    }
+
+    private void editCategory(String categoryId, String oldCategoryName, final String editedCategory){
+        database = FirebaseDatabase.getInstance();
+        DatabaseReference myRefToDatabase = database.getReference("Categories").child(categoryId).child("name");
+        myRefToDatabase.setValue(editedCategory);
+        editBookings(oldCategoryName, editedCategory);
+    }
+
+    private void editBookings(final String oldCategoryName, final String editedCategory) {
+        database = FirebaseDatabase.getInstance();
+        DatabaseReference myRefToDatabase = database.getReference("Bookings");
+        myRefToDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()){
+                    Gson gson = new Gson();
+                    String gsonString = gson.toJson(dataSnapshot.getValue());
+                    try {
+                        JSONObject bookings = new JSONObject(gsonString);
+                        Iterator<String> iterator = bookings.keys();
+                        while (iterator.hasNext()) {
+                            String key = iterator.next();
+                            JSONObject booking = new JSONObject(bookings.get(key).toString());
+                            if(booking.getString("categoryName").equals(oldCategoryName)){
+                                DatabaseReference refForEdit = database.getReference("Bookings").child(key).child("categoryName");
+                                refForEdit.setValue(editedCategory);
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }}
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
     }
 
     private void getCategoryInfo(final String categoryId){

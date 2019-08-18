@@ -150,7 +150,8 @@ public class AllBookingsAdminPanelActivity extends AppCompatActivity {
                             bookingJSONObj.get("user").toString(),
                             bookingJSONObj.get("itemName").toString(),
                             bookingJSONObj.get("itemId").toString(),
-                            bookingJSONObj.get("categoryId").toString());
+                            bookingJSONObj.get("categoryId").toString(),
+                            bookingJSONObj.get("categoryName").toString());
                     booking.setBookingId(key);
                     booking.setUserName(users.getJSONObject(booking.getUser()).getString("name"));
                     BookingWrapper bookingWrapper = new BookingWrapper(booking, interval);

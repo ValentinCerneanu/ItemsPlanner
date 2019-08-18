@@ -8,14 +8,24 @@ public class Booking {
     private String itemId;
     private String bookingId;
     private String categoryId;
+    private String categoryName;
     private String userName;
 
-    public Booking(String descriere, String user, String itemName, String itemId, String categoryId) {
+    public Booking(String descriere, String user, String itemName, String itemId, String categoryId, String categoryName) {
         this.descriere = descriere;
         this.user = user;
         this.itemName = itemName;
         this.itemId = itemId;
         this.categoryId = categoryId;
+        this.categoryName = categoryName;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 
     public String getUserName() {

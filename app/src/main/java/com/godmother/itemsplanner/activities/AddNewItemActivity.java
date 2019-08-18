@@ -195,22 +195,22 @@ public class AddNewItemActivity extends AppCompatActivity {
     }
 
     private String writeToDatabase(){
-        String categorie = (String) getIntent().getStringExtra("CATEGORY_NAME");
+        String categoryId = (String) getIntent().getStringExtra("CATEGORY_ID");
         myRefToDatabase = database.getReference("Categories");
         myRefToDatabase = myRefToDatabase.push();
         String itemGeneratedId = myRefToDatabase.getKey();
         myRefToDatabase = database.getReference("Categories");
-        myRefToDatabase.child(categorie).child("items").child(itemGeneratedId).child("name").setValue(numeItem.getText().toString());
-        myRefToDatabase.child(categorie).child("items").child(itemGeneratedId).child("descriere").setValue(descriereItem.getText().toString());
+        myRefToDatabase.child(categoryId).child("items").child(itemGeneratedId).child("name").setValue(numeItem.getText().toString());
+        myRefToDatabase.child(categoryId).child("items").child(itemGeneratedId).child("descriere").setValue(descriereItem.getText().toString());
         return itemGeneratedId;
     }
 
     private void writeImageInfoToDatabase(Image image, String itemGeneratedId){
-        String categorie = (String) getIntent().getStringExtra("CATEGORY_NAME");
+        String categoryId = getIntent().getStringExtra("CATEGORY_ID");
         myRefToDatabase = myRefToDatabase.push();
         String imageGeneratedId = myRefToDatabase.getKey();
         myRefToDatabase = database.getReference("Categories");
-        myRefToDatabase.child(categorie).child("items").child(itemGeneratedId).child("images").child(imageGeneratedId).setValue(image);
+        myRefToDatabase.child(categoryId).child("items").child(itemGeneratedId).child("images").child(imageGeneratedId).setValue(image);
 
     }
 

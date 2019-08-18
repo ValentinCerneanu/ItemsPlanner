@@ -24,8 +24,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.godmother.itemsplanner.CustomAdapters.MyCategoriesAdminPanelAdapter;
 import com.godmother.itemsplanner.R;
 import com.godmother.itemsplanner.models.Category;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -112,21 +110,8 @@ public class CategoriesAdminPanelActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
                 Intent nextActivity;
                 nextActivity = new Intent(getBaseContext(), ItemsAdminPanelActivity.class);
-
                 Category selectedCategory = (Category) arg0.getItemAtPosition(position);
-                Iterator<String> iterator = categories.keys();
-                while (iterator.hasNext()) {
-                    String key = iterator.next();
-                    if(key.equals(selectedCategory.getId())){
-                        try {
-                            JSONObject category = new JSONObject(categories.get(key).toString());
-                            nextActivity.putExtra("CATEGORY_ID", key);
-                            break;
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
+                nextActivity.putExtra("CATEGORY_ID", selectedCategory.getId());
                 nextActivity.putExtra("CATEGORY_NAME", selectedCategory.getName());
                 startActivity(nextActivity);
             }
@@ -137,18 +122,8 @@ public class CategoriesAdminPanelActivity extends AppCompatActivity {
     public void writeNewCategory(String category){
         database = FirebaseDatabase.getInstance();
         myRefToDatabase = database.getReference("Categories");
-        myRefToDatabase.child(category).child("name").setValue(category)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                    }
-                });
+        myRefToDatabase = myRefToDatabase.push();
+        myRefToDatabase.child("name").setValue(category);
     }
 
     private void getCategories() {
