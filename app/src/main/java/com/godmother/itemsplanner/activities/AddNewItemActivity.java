@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -43,6 +44,7 @@ import com.synnapps.carouselview.CarouselView;
 import com.synnapps.carouselview.ImageClickListener;
 import com.synnapps.carouselview.ImageListener;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -151,7 +153,11 @@ public class AddNewItemActivity extends AppCompatActivity {
             filePath = data.getData();
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
-                imageUploads.add(new ImageUpload(filePath, bitmap));
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 30, out);
+                byte[] byteArray = out.toByteArray();
+
+                imageUploads.add(new ImageUpload(filePath, byteArray, bitmap));
 
                 carouselView.setImageListener(imageListener);
                 carouselView.setPageCount(imageUploads.size());
@@ -230,7 +236,7 @@ public class AddNewItemActivity extends AppCompatActivity {
                 StorageReference ref = storageReference.child("images/" + uuid);
                 try {
 
-                    ref.putFile(imageUpload.getFilePath())
+                    ref.putBytes(imageUpload.getByteArray())
                             .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                 @Override
                                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {

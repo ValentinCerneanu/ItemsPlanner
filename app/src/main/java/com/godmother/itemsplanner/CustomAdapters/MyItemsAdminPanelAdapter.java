@@ -16,7 +16,6 @@ import androidx.annotation.NonNull;
 
 import com.godmother.itemsplanner.R;
 import com.godmother.itemsplanner.activities.EditItemActivity;
-import com.godmother.itemsplanner.activities.MyItemsReservations;
 import com.godmother.itemsplanner.models.Item;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;

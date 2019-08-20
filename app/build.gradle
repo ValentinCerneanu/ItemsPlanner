@@ -7,8 +7,8 @@ android {
         applicationId "com.godmother.itemsplanner"
         minSdkVersion 23
         targetSdkVersion 28
-        versionCode 7
-        versionName "1.101"
+        versionCode 8
+        versionName "1.102"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

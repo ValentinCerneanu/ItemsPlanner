@@ -52,6 +52,7 @@ import com.synnapps.carouselview.ImageListener;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -186,7 +187,7 @@ public class EditItemActivity  extends AppCompatActivity {
                 @Override
                 public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                     // Local temp file has been created
-                    imageUploads.add(new ImageUpload(null, BitmapFactory.decodeFile(localFile.getAbsolutePath())));
+                    imageUploads.add(new ImageUpload(null, null,  BitmapFactory.decodeFile(localFile.getAbsolutePath())));
                     carouselView.setImageListener(imageListener);
                     carouselView.setPageCount(imageUploads.size());
                 }
@@ -246,7 +247,11 @@ public class EditItemActivity  extends AppCompatActivity {
             filePath = data.getData();
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
-                imageUploads.add(new ImageUpload(filePath, bitmap));
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 30, out);
+                byte[] byteArray = out.toByteArray();
+
+                imageUploads.add(new ImageUpload(filePath, byteArray, bitmap));
 
                 carouselView.setImageListener(imageListener);
                 carouselView.setPageCount(imageUploads.size());
@@ -320,7 +325,7 @@ public class EditItemActivity  extends AppCompatActivity {
                 StorageReference ref = storageReference.child("images/" + uuid);
                 try {
 
-                    ref.putFile(imageUpload.getFilePath())
+                    ref.putBytes(imageUpload.getByteArray())
                             .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                 @Override
                                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {

@@ -8,8 +8,11 @@ public class ImageUpload {
     private Uri filePath;
     private Bitmap bitmap;
 
-    public ImageUpload(Uri filePath, Bitmap bitmap) {
+    private byte[] byteArray;
+
+    public ImageUpload(Uri filePath, byte[] byteArray, Bitmap bitmap) {
         this.filePath = filePath;
+        this.byteArray = byteArray;
         this.bitmap = bitmap;
     }
 
@@ -19,6 +22,14 @@ public class ImageUpload {
 
     public void setFilePath(Uri filePath) {
         this.filePath = filePath;
+    }
+
+    public byte[] getByteArray() {
+        return byteArray;
+    }
+
+    public void setByteArray(byte[] byteArray) {
+        this.byteArray = byteArray;
     }
 
     public Bitmap getBitmap() {
