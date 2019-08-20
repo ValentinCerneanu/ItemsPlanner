@@ -174,6 +174,13 @@ public class EditItemActivity  extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        } else {
+            ImageUpload imageUpload = new ImageUpload(null, null, BitmapFactory.decodeResource(getResources(), R.drawable.no_uploaded));
+            imageUpload.setNoImage(true);
+
+            imageUploads.add(imageUpload);
+            carouselView.setImageListener(imageListener);
+            carouselView.setPageCount(imageUploads.size());
         }
     }
 
@@ -205,7 +212,7 @@ public class EditItemActivity  extends AppCompatActivity {
     ImageClickListener imageClickListener = new ImageClickListener() {
         @Override
         public void onClick(final int position) {
-            if(imageUploads.size() > 1) {
+            if (!imageUploads.isEmpty() && !imageUploads.get(0).isNoImage()) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(EditItemActivity.this);
                 builder.setTitle("Stergere poza");
                 builder.setMessage("Vrei sa stergi aceasta poza?");
@@ -213,6 +220,12 @@ public class EditItemActivity  extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         imageUploads.remove(position);
+
+                        if (imageUploads.isEmpty()) {
+                            ImageUpload imageUpload = new ImageUpload(null, null, BitmapFactory.decodeResource(getResources(), R.drawable.no_uploaded));
+                            imageUpload.setNoImage(true);
+                            imageUploads.add(imageUpload);
+                        }
 
                         carouselView.setImageListener(imageListener);
                         carouselView.setPageCount(imageUploads.size());
@@ -226,6 +239,7 @@ public class EditItemActivity  extends AppCompatActivity {
                 });
                 AlertDialog dialog = builder.create();
                 dialog.show();
+
             }
         }
     };
@@ -246,6 +260,10 @@ public class EditItemActivity  extends AppCompatActivity {
             Uri filePath;
             filePath = data.getData();
             try {
+                if(!imageUploads.isEmpty() && imageUploads.get(0).isNoImage()) {
+                    imageUploads.clear();
+                }
+
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 30, out);

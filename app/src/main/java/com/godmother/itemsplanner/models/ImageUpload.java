@@ -7,13 +7,14 @@ public class ImageUpload {
 
     private Uri filePath;
     private Bitmap bitmap;
-
     private byte[] byteArray;
+    private boolean isNoImage;
 
     public ImageUpload(Uri filePath, byte[] byteArray, Bitmap bitmap) {
         this.filePath = filePath;
         this.byteArray = byteArray;
         this.bitmap = bitmap;
+        this.isNoImage = false;
     }
 
     public Uri getFilePath() {
@@ -38,5 +39,13 @@ public class ImageUpload {
 
     public void setBitmap(Bitmap bitmap) {
         this.bitmap = bitmap;
+    }
+
+    public boolean isNoImage() {
+        return isNoImage;
+    }
+
+    public void setNoImage(boolean noImage) {
+        isNoImage = noImage;
     }
 }

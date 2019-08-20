@@ -107,11 +107,18 @@ public class AddNewItemActivity extends AppCompatActivity {
             }
         });
 
+        ImageUpload imageUpload = new ImageUpload(null, null, BitmapFactory.decodeResource(getResources(), R.drawable.no_uploaded));
+        imageUpload.setNoImage(true);
+
+        imageUploads.add(imageUpload);
+        carouselView.setImageListener(imageListener);
+        carouselView.setPageCount(imageUploads.size());
+
     }
     ImageClickListener imageClickListener = new ImageClickListener() {
         @Override
         public void onClick(final int position) {
-            if(imageUploads.size() > 1) {
+            if (!imageUploads.isEmpty() && !imageUploads.get(0).isNoImage()) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(AddNewItemActivity.this);
                 builder.setTitle("Anulare adaugare poza");
                 builder.setMessage("Vrei sa anulezi adaugarea acestei poze?");
@@ -119,6 +126,12 @@ public class AddNewItemActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         imageUploads.remove(position);
+
+                        if (imageUploads.isEmpty()) {
+                            ImageUpload imageUpload = new ImageUpload(null, null, BitmapFactory.decodeResource(getResources(), R.drawable.no_uploaded));
+                            imageUpload.setNoImage(true);
+                            imageUploads.add(imageUpload);
+                        }
 
                         carouselView.setImageListener(imageListener);
                         carouselView.setPageCount(imageUploads.size());
@@ -152,6 +165,10 @@ public class AddNewItemActivity extends AppCompatActivity {
             Uri filePath;
             filePath = data.getData();
             try {
+                if(!imageUploads.isEmpty() && imageUploads.get(0).isNoImage()) {
+                    imageUploads.clear();
+                }
+
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 30, out);

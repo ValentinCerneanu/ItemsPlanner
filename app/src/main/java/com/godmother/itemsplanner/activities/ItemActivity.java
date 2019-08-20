@@ -164,7 +164,7 @@ public class ItemActivity extends AppCompatActivity {
                 }
                 if(cancel) {
                     focusView.requestFocus();
-                } else{
+                } else {
                     intervalSelectat = new ArrayList<Date>(calendar.getSelectedDates());
                     String conflictBooking = checkAvailability();
                     if(conflictBooking == null){
@@ -252,6 +252,10 @@ public class ItemActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        } else {
+            bitmaps.add(BitmapFactory.decodeResource(getResources(), R.drawable.no_uploaded));
+            carouselView.setImageListener(imageListener);
+            carouselView.setPageCount(bitmaps.size());
         }
     }
 
