@@ -111,12 +111,12 @@ public class ItemActivity extends AppCompatActivity {
                     try {
                         item = new JSONObject(gsonString);
                         getImages();
+                        getAllBookingsDetails();
                         try {
                             itemDescriptionTextView.setText("Descriere: " + item.getString("descriere"));
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        getAllBookingsDetails();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -303,6 +303,8 @@ public class ItemActivity extends AppCompatActivity {
                         builder.setPositiveButton("OK", null);
                         AlertDialog dialog = builder.create();
                         dialog.show();
+                        Date today = new Date();
+                        calendar.selectDate(today);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -330,7 +332,7 @@ public class ItemActivity extends AppCompatActivity {
         myRefToDatabase.child(getUserId()).child("bookings").child(generatedId).setValue(generatedId);
     }
 
-    public String checkAvailability(){
+    public String checkAvailability() {
         for(String bookingDetails: bookingsDetails){
             try {
                 JSONObject details = new JSONObject(bookingDetails);
@@ -360,7 +362,7 @@ public class ItemActivity extends AppCompatActivity {
 
                 database = FirebaseDatabase.getInstance();
                 myRefToDatabase = database.getReference("Bookings");
-                myRefToDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+                myRefToDatabase.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
@@ -374,6 +376,7 @@ public class ItemActivity extends AppCompatActivity {
                                     String key = iterator.next();
                                     bookingsDetails.add(bookings.getJSONObject(key).toString());
                                 }
+                                setHighLightedDates();
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -391,7 +394,7 @@ public class ItemActivity extends AppCompatActivity {
         }
     }
 
-    private void setupCalendar(){
+    private void setupCalendar() {
         Calendar nextYear = Calendar.getInstance();
         nextYear.add(Calendar.YEAR, 1);
         calendar = (CalendarPickerView) findViewById(R.id.calendar_view);
@@ -435,6 +438,36 @@ public class ItemActivity extends AppCompatActivity {
                 return false;
             }
         });
+    }
+
+    private void setHighLightedDates() {
+        for(String bookingDetails: bookingsDetails){
+            try {
+                JSONObject bookingDetailsObject = new JSONObject(bookingDetails);
+                JSONObject interval = bookingDetailsObject.getJSONObject("interval");
+
+                DateFormat dateFormat = new SimpleDateFormat("yyyy MM dd");
+                Date from = dateFormat.parse(interval.getString("from"));
+                Date till = dateFormat.parse(interval.getString("till"));
+
+                ArrayList<Date> highlightedDates = new ArrayList<>();
+                highlightedDates.add(from);
+                while(from.before(till)) {
+                    Calendar c = Calendar.getInstance();
+                    c.setTime(from);
+                    c.add(Calendar.DATE, 1);
+                    from = c.getTime();
+                    highlightedDates.add(from);
+                }
+                highlightedDates.add(till);
+
+                calendar.highlightDates(highlightedDates);
+
+            } catch (JSONException | ParseException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 
     public void hideKeyboardFrom(Context context, View view) {

@@ -3,4 +3,8 @@
     <color name="colorPrimary">#fff</color>
     <color name="colorPrimaryDark">#fff</color>
     <color name="colorAccent">#5C1A38</color>
+
+    <color name="calendar_highlighted_day_bg">#d63232</color>
+    <color name="calendar_text_highlighted">#fff</color>
 </resources>
+
