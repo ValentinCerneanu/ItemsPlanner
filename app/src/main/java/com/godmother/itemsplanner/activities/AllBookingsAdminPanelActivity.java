@@ -40,7 +40,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 
-public class MyItemsReservations extends AppCompatActivity {
+public class AllBookingsAdminPanelActivity extends AppCompatActivity {
 
     DrawerLayout drawerLayout;
     NavigationView navigationView;
@@ -54,8 +54,7 @@ public class MyItemsReservations extends AppCompatActivity {
     MyReservationsAdapter reservationsAdapter;
 
     JSONObject bookings;
-    JSONObject userBookigs;
-
+    JSONObject users;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -69,16 +68,44 @@ public class MyItemsReservations extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final ListView list = (ListView) findViewById(R.id.list);
-        Context context = MyItemsReservations.this;
+        Context context = AllBookingsAdminPanelActivity.this;
         reservationsAdapter = new MyReservationsAdapter(bookingsList, context);
         list.setAdapter(reservationsAdapter);
 
-        bookings = getAllBookings();
+        users = getAllUsers();
 
         setupToolbarAndDrawer();
     }
 
-    private JSONObject getAllBookings() {
+    private JSONObject getAllUsers() {
+
+        final JSONObject[] users = {null};
+        database = FirebaseDatabase.getInstance();
+        myRefToDatabase = database.getReference("Users");
+        myRefToDatabase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    Gson gson = new Gson();
+                    String gsonString = gson.toJson(dataSnapshot.getValue());
+                    try {
+                        users[0] = new JSONObject(gsonString);
+                        bookings = getAllBookings(users[0]);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        return users[0];
+    }
+
+    private JSONObject getAllBookings(final JSONObject users) {
 
         final JSONObject[] bookings = {null};
         database = FirebaseDatabase.getInstance();
@@ -91,7 +118,7 @@ public class MyItemsReservations extends AppCompatActivity {
                     String gsonString = gson.toJson(dataSnapshot.getValue());
                     try {
                         bookings[0] = new JSONObject(gsonString);
-                        userBookigs = getItemsReservations(bookings[0]);
+                        setUpListAdapter(bookings[0], users);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -106,37 +133,8 @@ public class MyItemsReservations extends AppCompatActivity {
         return bookings[0];
     }
 
-    private JSONObject getItemsReservations(final JSONObject bookings) {
-        String userId = getUserId();
-
-        final JSONObject[] userBookings = {null};
-        database = FirebaseDatabase.getInstance();
-        myRefToDatabase = database.getReference("Users").child(userId).child("bookings");
-        myRefToDatabase.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    Gson gson = new Gson();
-                    String gsonString = gson.toJson(dataSnapshot.getValue());
-                    try {
-                        userBookings[0] = new JSONObject(gsonString);
-                        setUpListAdapter(userBookings[0], bookings);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-        return userBookings[0];
-    }
-
-    public void setUpListAdapter(JSONObject userBookigs, JSONObject bookings){
-        Iterator<String> iterator = userBookigs.keys();
+    public void setUpListAdapter(JSONObject bookings, JSONObject users){
+        Iterator<String> iterator = bookings.keys();
         bookingsList.clear();
         while (iterator.hasNext()) {
             String key = iterator.next();
@@ -147,14 +145,17 @@ public class MyItemsReservations extends AppCompatActivity {
                     Date from = dateFormat.parse(bookingJSONObj.getJSONObject("interval").getString("from"));
                     Date till = dateFormat.parse(bookingJSONObj.getJSONObject("interval").getString("till"));
                     Interval interval = new Interval(from, till);
+
                     Booking booking = new Booking(bookingJSONObj.get("descriere").toString(),
-                                                  bookingJSONObj.get("user").toString(),
-                                                  bookingJSONObj.get("itemName").toString(),
-                                                  bookingJSONObj.get("itemId").toString(),
-                                                  bookingJSONObj.get("categoryId").toString(),
-                                                  bookingJSONObj.get("categoryName").toString());
+                            bookingJSONObj.get("user").toString(),
+                            bookingJSONObj.get("itemName").toString(),
+                            bookingJSONObj.get("itemId").toString(),
+                            bookingJSONObj.get("categoryId").toString(),
+                            bookingJSONObj.get("categoryName").toString());
                     booking.setBookingId(key);
+                    booking.setUserName(users.getJSONObject(booking.getUser()).getString("name"));
                     BookingWrapper bookingWrapper = new BookingWrapper(booking, interval);
+                    bookingWrapper.setPhoneNumber(users.getJSONObject(booking.getUser()).getString("phoneNumber"));
                     bookingsList.add(bookingWrapper);
                     //reservationsAdapter.notifyDataSetChanged();
                 } catch (ParseException e) {
@@ -162,7 +163,7 @@ public class MyItemsReservations extends AppCompatActivity {
                 }
 
             } catch (JSONException e) {
-                // Something went wrong!
+                e.printStackTrace();
             }
         }
         reservationsAdapter.notifyDataSetChanged();
@@ -197,16 +198,15 @@ public class MyItemsReservations extends AppCompatActivity {
                         finishAffinity();
                         break;
                     }
-
                     case R.id.nav_my_items_reservations: {
+                        Intent nextActivity;
+                        nextActivity = new Intent(getBaseContext(), MyItemsReservations.class);
+                        startActivity(nextActivity);
+                        finish();
                         break;
                     }
 
                     case R.id.nav_admin_toate_rezervarile: {
-                        Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), AllBookingsAdminPanelActivity.class);
-                        startActivity(nextActivity);
-                        finish();
                         break;
                     }
 
@@ -245,11 +245,7 @@ public class MyItemsReservations extends AppCompatActivity {
         });
 
         titleTextView = (TextView) findViewById(R.id.barTitle);
-        titleTextView.setText("Rezervarile mele");
+        titleTextView.setText("AdminPanel Toate Rezervarile");
     }
 
-    public String getUserId(){
-        SharedPreferences sharedPreferences = getSharedPreferences("FirebaseUser", MODE_PRIVATE);
-        return sharedPreferences.getString("id", null);
-    }
 }

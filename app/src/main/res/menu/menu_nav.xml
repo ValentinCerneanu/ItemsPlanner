@@ -9,12 +9,23 @@
                 android:id="@+id/nav_my_items_reservations"
                 android:icon="@drawable/ic_baseline_my_reservations"
                 android:title="Rezervarile mele" />
-            <item
-                android:id="@+id/nav_admin_panel"
-                android:icon="@drawable/ic_baseline_dashboard"
-                android:title="Admin Panel" />
         </menu>
     </item>
+    <item
+        android:id="@+id/submenu_admin_panels"
+        android:title="Admin panels">
+        <menu>
+            <item
+                android:id="@+id/nav_admin_toate_rezervarile"
+                android:icon="@drawable/ic_baseline_dashboard"
+                android:title="Toate Rezervarile" />
+            <item
+                android:id="@+id/nav_admin_categorii_iteme"
+                android:icon="@drawable/ic_baseline_dashboard"
+                android:title="Categorii si Iteme" />
+        </menu>
+    </item>
+
     <item android:title="My Account">
         <menu>
             <item

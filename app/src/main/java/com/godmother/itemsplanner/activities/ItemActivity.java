@@ -5,17 +5,22 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,13 +41,20 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 import com.squareup.timessquare.CalendarPickerView;
+import com.synnapps.carouselview.CarouselView;
+import com.synnapps.carouselview.ImageListener;
 
 import org.joda.time.DateTimeComparator;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -61,12 +73,17 @@ public class ItemActivity extends AppCompatActivity {
     CalendarPickerView calendar;
     AppCompatButton butonRezerva;
     EditText scopRezervare;
+    TextView itemDescriptionTextView;
+    CarouselView carouselView;
 
     ArrayList<Date> intervalSelectat = new ArrayList<>();
     ArrayList<String> bookingsDetails = new ArrayList<>();
+    ArrayList<Bitmap> bitmaps = new ArrayList<Bitmap>();
+
 
     FirebaseDatabase database;
     DatabaseReference myRefToDatabase;
+    FirebaseStorage storage;
 
     JSONObject item = null;
     JSONObject bookings = null;
@@ -76,10 +93,13 @@ public class ItemActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item);
         setupToolbarAndDrawer();
-        final TextView itemDescriptionTextView = (TextView)findViewById(R.id.itemDescription);
+        itemDescriptionTextView = (TextView)findViewById(R.id.itemDescription);
+
+        carouselView = (CarouselView) findViewById(R.id.carouselView);
 
         String categoryId = getIntent().getStringExtra("CATEGORY_ID");
         final String itemId = getIntent().getStringExtra("ITEM_ID");
+        storage = FirebaseStorage.getInstance();
         database = FirebaseDatabase.getInstance();
         myRefToDatabase = database.getReference("Categories").child(categoryId).child("items").child(itemId);
         myRefToDatabase.addValueEventListener(new ValueEventListener() {
@@ -90,6 +110,7 @@ public class ItemActivity extends AppCompatActivity {
                     String gsonString = gson.toJson(dataSnapshot.getValue());
                     try {
                         item = new JSONObject(gsonString);
+                        getImages();
                         try {
                             itemDescriptionTextView.setText("Descriere: " + item.getString("descriere"));
                         } catch (JSONException e) {
@@ -143,16 +164,15 @@ public class ItemActivity extends AppCompatActivity {
                 }
                 if(cancel) {
                     focusView.requestFocus();
-                } else{
+                } else {
                     intervalSelectat = new ArrayList<Date>(calendar.getSelectedDates());
                     String conflictBooking = checkAvailability();
                     if(conflictBooking == null){
                         Date from = intervalSelectat.get(0);
                         Date till = intervalSelectat.get(intervalSelectat.size() - 1);
-                        Booking booking = null;
-                        booking = new Booking(scopRezervare.getText().toString(), getUserId(),
+                        Booking booking = new Booking(scopRezervare.getText().toString(), getUserId(),
                                 (String) getIntent().getStringExtra("ITEM_NAME"), itemId,
-                                getIntent().getStringExtra("CATEGORY_ID"));
+                                getIntent().getStringExtra("CATEGORY_ID"), getIntent().getStringExtra("CATEGORY_NAME"));
                         Interval interval = new Interval(from, till);
                         writeNewBooking(booking, interval);
                     } else {
@@ -203,6 +223,66 @@ public class ItemActivity extends AppCompatActivity {
         });
     }
 
+    ImageListener imageListener = new ImageListener() {
+        @Override
+        public void setImageForPosition(int position, ImageView imageView) {
+            if(bitmaps.get(position) != null)
+                imageView.setImageBitmap(bitmaps.get(position));
+        }
+    };
+
+    private void getImages(){
+        String images;
+        if(item.has("images")) {
+            try {
+                images = item.getString("images");
+                JSONObject imagesJson = new JSONObject(images);
+                Iterator<String> iterator = imagesJson.keys();
+                while (iterator.hasNext()) {
+                    String key = iterator.next();
+                    try {
+                        JSONObject image = new JSONObject(imagesJson.get(key).toString());
+                        String url = image.get("url").toString();
+                        String uid = image.get("uid").toString();
+                        getImage(uid);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            bitmaps.add(BitmapFactory.decodeResource(getResources(), R.drawable.no_uploaded));
+            carouselView.setImageListener(imageListener);
+            carouselView.setPageCount(bitmaps.size());
+        }
+    }
+
+    private void getImage(String uid) {
+        final File localFile;
+        try {
+            StorageReference storageReference = storage.getReference();
+            storageReference = storageReference.child("images/" + uid);
+            localFile = File.createTempFile("image" + uid, "jpg");
+            storageReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                    // Local temp file has been created
+                    bitmaps.add(BitmapFactory.decodeFile(localFile.getAbsolutePath()));
+                    carouselView.setImageListener(imageListener);
+                    carouselView.setPageCount(bitmaps.size());
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle any errors
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void writeNewBooking(Booking booking, Interval interval){
         String categoryId = getIntent().getStringExtra("CATEGORY_ID");
@@ -340,6 +420,21 @@ public class ItemActivity extends AppCompatActivity {
                 hideKeyboardFrom(context, calendar);
             }
         });
+
+        ScrollView parentScrollView = findViewById(R.id.parentScroll);
+        parentScrollView.setOnTouchListener(new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                findViewById(R.id.childScroll).getParent().requestDisallowInterceptTouchEvent(false);
+                return false;
+            }
+        });
+        calendar.setOnTouchListener(new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event)
+            {
+                v.getParent().requestDisallowInterceptTouchEvent(true);
+                return false;
+            }
+        });
     }
 
     public void hideKeyboardFrom(Context context, View view) {
@@ -366,10 +461,6 @@ public class ItemActivity extends AppCompatActivity {
             // This method will trigger on item Click of navigation menu
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
-                if (menuItem.isChecked())
-                    menuItem.setChecked(false);
-                else
-                    menuItem.setChecked(true);
                 //Closing drawer on item click
                 drawerLayout.closeDrawers();
                 switch (menuItem.getItemId()) {
@@ -380,17 +471,28 @@ public class ItemActivity extends AppCompatActivity {
                         finishAffinity();
                         break;
                     }
+
                     case R.id.nav_my_items_reservations: {
                         Intent nextActivity;
                         nextActivity = new Intent(getBaseContext(), MyItemsReservations.class);
                         startActivity(nextActivity);
+                        finishAffinity();
                         break;
                     }
 
-                    case R.id.nav_admin_panel: {
+                    case R.id.nav_admin_toate_rezervarile: {
                         Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), AdminPanelActivity.class);
+                        nextActivity = new Intent(getBaseContext(), AllBookingsAdminPanelActivity.class);
                         startActivity(nextActivity);
+                        finishAffinity();
+                        break;
+                    }
+
+                    case R.id.nav_admin_categorii_iteme: {
+                        Intent nextActivity;
+                        nextActivity = new Intent(getBaseContext(), CategoriesAdminPanelActivity.class);
+                        startActivity(nextActivity);
+                        finishAffinity();
                         break;
                     }
 
@@ -409,7 +511,7 @@ public class ItemActivity extends AppCompatActivity {
 
         Menu nav_Menu = navigationView.getMenu();
         if(sharedPreferences.getString("isAdmin", "").equals("false")){
-            nav_Menu.findItem(R.id.nav_admin_panel).setVisible(false);
+            nav_Menu.findItem(R.id.submenu_admin_panels).setVisible(false);
         }
 
         burgerBtn = (ImageButton) findViewById(R.id.hamburger_btn);

@@ -116,7 +116,8 @@ public class MainActivity extends AppCompatActivity {
                     if(key.equals(selectedCategory.getId())){
                         try {
                             JSONObject category = new JSONObject(categories.get(key).toString());
-                            nextActivity.putExtra("ITEMS_LIST", category.get("items").toString());
+                            if(category.has("items"))
+                                nextActivity.putExtra("ITEMS_LIST", category.get("items").toString());
                             nextActivity.putExtra("CATEGORY_ID", key);
                             break;
                         } catch (JSONException e) {
@@ -186,20 +187,13 @@ public class MainActivity extends AppCompatActivity {
             // This method will trigger on item Click of navigation menu
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
-                if (menuItem.isChecked())
-                    menuItem.setChecked(false);
-                else
-                    menuItem.setChecked(true);
                 //Closing drawer on item click
                 drawerLayout.closeDrawers();
                 switch (menuItem.getItemId()) {
                     case R.id.nav_home: {
-                        Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), MainActivity.class);
-                        startActivity(nextActivity);
-                        finishAffinity();
                         break;
                     }
+
                     case R.id.nav_my_items_reservations: {
                         Intent nextActivity;
                         nextActivity = new Intent(getBaseContext(), MyItemsReservations.class);
@@ -207,9 +201,16 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     }
 
-                    case R.id.nav_admin_panel: {
+                    case R.id.nav_admin_toate_rezervarile: {
                         Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), AdminPanelActivity.class);
+                        nextActivity = new Intent(getBaseContext(), AllBookingsAdminPanelActivity.class);
+                        startActivity(nextActivity);
+                        break;
+                    }
+
+                    case R.id.nav_admin_categorii_iteme: {
+                        Intent nextActivity;
+                        nextActivity = new Intent(getBaseContext(), CategoriesAdminPanelActivity.class);
                         startActivity(nextActivity);
                         break;
                     }
@@ -229,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
 
         Menu nav_Menu = navigationView.getMenu();
         if(sharedPreferences.getString("isAdmin", "").equals("false")){
-            nav_Menu.findItem(R.id.nav_admin_panel).setVisible(false);
+            nav_Menu.findItem(R.id.submenu_admin_panels).setVisible(false);
         }
 
         burgerBtn = (ImageButton) findViewById(R.id.hamburger_btn);
