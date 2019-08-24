@@ -1,6 +1,8 @@
 package com.godmother.itemsplanner.models;
 
-public class Item {
+import java.io.Serializable;
+
+public class Item implements Serializable {
     private String id;
     private String name;
     private String descriere;

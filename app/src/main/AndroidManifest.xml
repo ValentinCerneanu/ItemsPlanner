@@ -75,6 +75,11 @@
             android:screenOrientation="portrait">
         </activity>
 
+        <activity
+            android:name="com.godmother.itemsplanner.activities.SearchResults"
+            android:screenOrientation="portrait">
+        </activity>
+
     </application>
 
 </manifest>

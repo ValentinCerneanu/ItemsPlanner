@@ -305,6 +305,8 @@ public class ItemActivity extends AppCompatActivity {
                         dialog.show();
                         Date today = new Date();
                         calendar.selectDate(today);
+                        scopRezervare.setText("");
+                        scopRezervare.clearFocus();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -377,6 +379,7 @@ public class ItemActivity extends AppCompatActivity {
                                     bookingsDetails.add(bookings.getJSONObject(key).toString());
                                 }
                                 setHighLightedDates();
+
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -463,7 +466,7 @@ public class ItemActivity extends AppCompatActivity {
 
                 calendar.highlightDates(highlightedDates);
 
-            } catch (JSONException | ParseException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 

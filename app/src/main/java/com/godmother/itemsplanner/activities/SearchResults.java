@@ -17,25 +17,25 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.godmother.itemsplanner.R;
-import com.godmother.itemsplanner.models.Item;
+import com.godmother.itemsplanner.models.SearchedItem;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
-public class ItemsActivity extends AppCompatActivity {
+public class SearchResults extends AppCompatActivity {
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     TextView titleTextView;
     ImageButton burgerBtn;
 
-    ArrayList<Item> itemsList = new ArrayList<Item>();
-    ArrayAdapter<Item> adapter;
-    JSONObject items = null;
+    ArrayList<SearchedItem> itemsList = new ArrayList<SearchedItem>();
+    ArrayAdapter<SearchedItem> adapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,29 +43,11 @@ public class ItemsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_search_result);
         setupToolbarAndDrawer();
 
-        adapter = new ArrayAdapter<Item>(this, android.R.layout.simple_list_item_1, itemsList);
         final ListView list = (ListView) findViewById(R.id.list);
+        Bundle itemsString = (Bundle) getIntent().getBundleExtra("SEARCH_RESULTS");
+        itemsList = (ArrayList<SearchedItem>) itemsString.getSerializable("items");
+        adapter = new ArrayAdapter<SearchedItem>(this, android.R.layout.simple_list_item_1, itemsList);
         list.setAdapter(adapter);
-        String itemsString = (String) getIntent().getSerializableExtra("ITEMS_LIST");
-        if(itemsString != null) {
-            try {
-                items = new JSONObject(itemsString);
-                Iterator<String> iterator = items.keys();
-                while (iterator.hasNext()) {
-                    String key = iterator.next();
-                    try {
-                        JSONObject item = new JSONObject(items.get(key).toString());
-                        itemsList.add(new Item(key, item.get("name").toString(),
-                                                item.get("descriere").toString()));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-                adapter.notifyDataSetChanged();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
 
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -74,25 +56,21 @@ public class ItemsActivity extends AppCompatActivity {
                 Intent nextActivity;
                 nextActivity = new Intent(getBaseContext(), ItemActivity.class);
 
-                Item selectedItem = (Item) arg0.getItemAtPosition(position);
-                Iterator<String> iterator = items.keys();
-                while (iterator.hasNext()) {
-                    String key = iterator.next();
-                    if(key.equals(selectedItem.getId())){
-                        try {
-                            JSONObject item = new JSONObject(items.get(key).toString());
-                            nextActivity.putExtra("ITEM", item.toString());
-                            nextActivity.putExtra("CATEGORY_ID", getIntent().getStringExtra("CATEGORY_ID"));
-                            nextActivity.putExtra("ITEM_ID", key);
-                            nextActivity.putExtra("CATEGORY_NAME", getIntent().getStringExtra("CATEGORY_NAME"));
-                            break;
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                SearchedItem selectedItem = (SearchedItem) arg0.getItemAtPosition(position);
+
+                Gson gson = new Gson();
+                String json = gson.toJson(selectedItem);
+                try{
+                    JSONObject item = new JSONObject(json);
+                    nextActivity.putExtra("ITEM", item.toString());
+                    nextActivity.putExtra("CATEGORY_ID", selectedItem.getCategoryId());
+                    nextActivity.putExtra("ITEM_ID", selectedItem.getId());
+                    nextActivity.putExtra("CATEGORY_NAME", selectedItem.getCategoryName());
+                    nextActivity.putExtra("ITEM_NAME", selectedItem.getName());
+                    startActivity(nextActivity);
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-                nextActivity.putExtra("ITEM_NAME", selectedItem.getName());
-                startActivity(nextActivity);
             }
         });
     }
@@ -179,7 +157,6 @@ public class ItemsActivity extends AppCompatActivity {
 
         titleTextView = (TextView) findViewById(R.id.barTitle);
 
-        String categorie = (String) getIntent().getStringExtra("CATEGORY_NAME");
-        titleTextView.setText("Iteme din categoria " + categorie);
+        titleTextView.setText("Resultatele cautarii ");
     }
 }
