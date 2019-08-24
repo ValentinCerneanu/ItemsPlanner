@@ -91,4 +91,11 @@ public class Booking {
         }
         return itemName + "\n" + descriere + "\n" + userName;
     }
+
+    public String toEmail() {
+        if(userName == null){
+            return itemName + "<br />" + descriere;
+        }
+        return itemName + "<br />" + descriere + "<br />" + userName;
+    }
 }

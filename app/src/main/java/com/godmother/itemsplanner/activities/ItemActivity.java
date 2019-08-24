@@ -30,7 +30,9 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.godmother.itemsplanner.R;
+import com.godmother.itemsplanner.Utils.SendGetRequest;
 import com.godmother.itemsplanner.models.Booking;
+import com.godmother.itemsplanner.models.BookingWrapper;
 import com.godmother.itemsplanner.models.Interval;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -55,6 +57,10 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -284,7 +290,7 @@ public class ItemActivity extends AppCompatActivity {
         }
     }
 
-    public void writeNewBooking(Booking booking, Interval interval){
+    public void writeNewBooking(final Booking booking, final Interval interval){
         String categoryId = getIntent().getStringExtra("CATEGORY_ID");
         String itemId = getIntent().getStringExtra("ITEM_ID");
         database = FirebaseDatabase.getInstance();
@@ -303,6 +309,9 @@ public class ItemActivity extends AppCompatActivity {
                         builder.setPositiveButton("OK", null);
                         AlertDialog dialog = builder.create();
                         dialog.show();
+
+                        sendEmail(booking, interval, scopRezervare.getText().toString());
+
                         Date today = new Date();
                         calendar.selectDate(today);
                         scopRezervare.setText("");
@@ -473,6 +482,30 @@ public class ItemActivity extends AppCompatActivity {
         }
     }
 
+    private void sendEmail(Booking booking, Interval interval, String scopRezervare) {
+        SharedPreferences sharedPreferences = getSharedPreferences("FirebaseUser", MODE_PRIVATE);
+
+        String userName = sharedPreferences.getString("name", "");
+        String phoneNumber = sharedPreferences.getString("phoneNumber", "");
+        String email = sharedPreferences.getString("email", "");
+
+        booking.setUserName(userName);
+        BookingWrapper bookingWrapper = new BookingWrapper(booking, interval);
+        bookingWrapper.setPhoneNumber(phoneNumber);
+
+        String url = "https://us-central1-items-planner.cloudfunctions.net/sendMail?dest=" + email
+                                                                                    + "&mesaj=" + bookingWrapper.toEmail();
+        url = url.replaceAll(" ", "%20");
+
+        SendGetRequest emailSender = null;
+        try {
+            emailSender = new SendGetRequest(new URL(url));
+            emailSender.execute();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void hideKeyboardFrom(Context context, View view) {
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
@@ -570,22 +603,4 @@ public class ItemActivity extends AppCompatActivity {
         return sharedPreferences.getString("id", null);
     }
 
-    public boolean isBefore(Date date1, Date date2){
-        Calendar calendar1 = Calendar.getInstance();
-        calendar1.setTime(date1);
-        int year1 = calendar1.get(Calendar.YEAR);
-        int month1 = calendar1.get(Calendar.MONTH) + 1; // Note: zero based!
-        int day1 = calendar1.get(Calendar.DAY_OF_MONTH);
-
-        Calendar calendar2 = Calendar.getInstance();
-        calendar2.setTime(date2);
-        int year2 = calendar2.get(Calendar.YEAR);
-        int month2 = calendar2.get(Calendar.MONTH) + 1; // Note: zero based!
-        int day2 = calendar2.get(Calendar.DAY_OF_MONTH);
-        if(year1 == year2 && month1 == month2 && day1 == day2)
-            return false;
-        if(DateTimeComparator.getDateOnlyInstance().compare(date1, date2) < 0)
-            return true;
-        return false;
-    }
 }

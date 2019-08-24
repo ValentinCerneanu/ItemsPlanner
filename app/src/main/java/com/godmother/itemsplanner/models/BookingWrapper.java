@@ -40,4 +40,10 @@ public class BookingWrapper {
             return booking.toString() + "\n" + interval.toString();
         return booking.toString() + "\n" + phoneNumber + "\n" + interval.toString();
     }
+
+    public String toEmail() {
+        if(phoneNumber == null)
+            return booking.toEmail() + "<br />" + interval.toString();
+        return booking.toEmail() + "<br />" + phoneNumber + "<br />" + interval.toString();
+    }
 }
