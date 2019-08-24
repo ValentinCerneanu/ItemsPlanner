@@ -51,16 +51,12 @@ import com.squareup.timessquare.CalendarPickerView;
 import com.synnapps.carouselview.CarouselView;
 import com.synnapps.carouselview.ImageListener;
 
-import org.joda.time.DateTimeComparator;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -85,7 +81,6 @@ public class ItemActivity extends AppCompatActivity {
     ArrayList<Date> intervalSelectat = new ArrayList<>();
     ArrayList<String> bookingsDetails = new ArrayList<>();
     ArrayList<Bitmap> bitmaps = new ArrayList<Bitmap>();
-
 
     FirebaseDatabase database;
     DatabaseReference myRefToDatabase;
@@ -116,7 +111,8 @@ public class ItemActivity extends AppCompatActivity {
                     String gsonString = gson.toJson(dataSnapshot.getValue());
                     try {
                         item = new JSONObject(gsonString);
-                        getImages();
+                        if(bitmaps.isEmpty())
+                            getImages();
                         getAllBookingsDetails();
                         try {
                             itemDescriptionTextView.setText("Descriere: " + item.getString("descriere"));
