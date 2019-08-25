@@ -1,7 +1,9 @@
 package com.godmother.itemsplanner.activities;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -208,6 +210,30 @@ public class MainActivity extends AppCompatActivity {
                     String gsonString = gson.toJson(dataSnapshot.getValue());
                     try {
                         JSONObject userJson = new JSONObject(gsonString);
+                        if(userJson.has("blocked") && userJson.getString("blocked").equals("true")) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                            builder.setTitle("Cont Blocat");
+                            builder.setMessage("Contul tau a fost blocat de catre adminul aplicatie!");
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    FirebaseAuth.getInstance().signOut();
+                                    finishAffinity();
+                                    return;
+
+                                }
+                            });
+                            builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                @Override
+                                public void onDismiss(DialogInterface dialog) {
+                                    FirebaseAuth.getInstance().signOut();
+                                    finishAffinity();
+                                    return;
+                                }
+                            });
+                            AlertDialog dialog = builder.create();
+                            dialog.show();
+                        }
                         user = new User(userJson.getString("name"), userJson.getString("phoneNumber"));
                         user.setIsAdmin(userJson.getString("isAdmin"));
                     } catch (JSONException e) {
@@ -280,6 +306,13 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.nav_admin_categorii_iteme: {
                         Intent nextActivity;
                         nextActivity = new Intent(getBaseContext(), CategoriesAdminPanelActivity.class);
+                        startActivity(nextActivity);
+                        break;
+                    }
+
+                    case R.id.nav_admin_control_conturi: {
+                        Intent nextActivity;
+                        nextActivity = new Intent(getBaseContext(), ControlConturiActivity.class);
                         startActivity(nextActivity);
                         break;
                     }

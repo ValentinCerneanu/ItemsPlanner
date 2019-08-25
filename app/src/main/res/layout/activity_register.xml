@@ -93,8 +93,7 @@
             android:layout_marginTop="24dp"
             android:layout_marginBottom="15dp"
             android:padding="12dp"
-            android:text="Create Account"
-            android:onClick="createAccount"/>
+            android:text="Create Account" />
 
 
         <androidx.appcompat.widget.AppCompatButton

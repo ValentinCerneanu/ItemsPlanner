@@ -80,6 +80,11 @@
             android:screenOrientation="portrait">
         </activity>
 
+        <activity
+            android:name="com.godmother.itemsplanner.activities.ControlConturiActivity"
+            android:screenOrientation="portrait">
+        </activity>
+
     </application>
 
 </manifest>

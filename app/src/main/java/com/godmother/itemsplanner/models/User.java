@@ -4,6 +4,7 @@ public class User {
     private String name;
     private String phoneNumber;
     private String isAdmin;
+    private String email;
 
     public User(String name, String phoneNumber) {
         this.name = name;
@@ -32,5 +33,13 @@ public class User {
 
     public void setIsAdmin(String isAdmin) {
         this.isAdmin = isAdmin;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

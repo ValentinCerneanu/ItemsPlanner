@@ -1,6 +1,7 @@
 package com.godmother.itemsplanner.activities;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,12 +22,22 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.godmother.itemsplanner.R;
 import com.godmother.itemsplanner.models.User;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Iterator;
 
 
 public class RegisterActivity extends AppCompatActivity {
@@ -36,6 +48,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText mPhone;
     private EditText mPassword;
     private EditText mConfirmPassword;
+    private Button createAccount;
 
     private FirebaseDatabase database;
     private DatabaseReference myRefToDatabase;
@@ -63,6 +76,13 @@ public class RegisterActivity extends AppCompatActivity {
                 return false;
             }
         });
+        createAccount = findViewById(R.id.btn_signup);
+        createAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                createAccount();
+            }
+        });
     }
 
     public void createAccount() {
@@ -74,6 +94,7 @@ public class RegisterActivity extends AppCompatActivity {
             String passwordConfirmed = mConfirmPassword.getText().toString();
 
             final User user = new User(name, phone);
+            user.setEmail(email);
 
             View focusView = null;
             boolean cancel = false;
@@ -115,40 +136,107 @@ public class RegisterActivity extends AppCompatActivity {
                 // form field with an error.
                 focusView.requestFocus();
             } else {
-                mAuth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                if (task.isSuccessful()) {
-                                    // Sign in success, update UI with the signed-in user's information
-                                    FirebaseUser firebaseUser = mAuth.getCurrentUser();
-                                    writeToUsersTable(firebaseUser, user);
-                                    Intent nextActivity;
-                                    nextActivity = new Intent(getBaseContext(), MainActivity.class);
-                                    startActivity(nextActivity);
-                                    finish();
-                                    firebaseUser.sendEmailVerification()
-                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                    if (task.isSuccessful()) {
-                                                        Log.d("", "Email sent.");
-                                                    }
-                                                }
-                                            });
-                                } else {
-                                    // If sign in fails, display a message to the user.
-                                    Log.w("", "createUserWithEmail:failure", task.getException());
-                                    Toast.makeText(RegisterActivity.this, "Authentication failed.",
-                                            Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        });
+                checkEmailIsWhiteListed(email, password, user);
             }
         }
         catch(Exception e){
             e.printStackTrace();
         }
+    }
+
+    private void createAccout(final String email, final String password, final User user) {
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                            writeToUsersTable(firebaseUser, user);
+                            Intent nextActivity;
+                            nextActivity = new Intent(getBaseContext(), MainActivity.class);
+                            startActivity(nextActivity);
+                            finish();
+                            firebaseUser.sendEmailVerification()
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                Log.d("", "Email sent.");
+                                            }
+                                        }
+                                    });
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w("", "createUserWithEmail:failure", task.getException());
+                            Toast.makeText(RegisterActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                })
+                .addOnFailureListener(this, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
+                        builder.setTitle("Eroare");
+                        builder.setMessage(e.getMessage());
+                        builder.setPositiveButton("OK", null);
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    }
+                });
+    }
+
+    private boolean checkEmailIsWhiteListed(final String email, final String password, final User user) {
+        final boolean[] isWhiteListed = new boolean[1];
+        isWhiteListed[0] = false;
+        database = FirebaseDatabase.getInstance();
+        DatabaseReference myRefToDatabase = database.getReference("UsersEmail");
+        myRefToDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    Gson gson = new Gson();
+                    String gsonString = gson.toJson(dataSnapshot.getValue());
+
+                    try {
+                        JSONObject usersJson = new JSONObject(gsonString);
+                        Iterator<String> iterator = usersJson.keys();
+                        while (iterator.hasNext()) {
+                            String key = iterator.next();
+                            try {
+                                String userEmail = usersJson.getString(key);
+                                if(userEmail.equals(email)) {
+                                    isWhiteListed[0] = true;
+                                    createAccout(email, password, user);
+                                    break;
+                                }
+                            } catch (JSONException e) {
+                                // Something went wrong!
+                            }
+                        }
+                        if(isWhiteListed[0] == false) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
+                            builder.setTitle("Email neautorizat");
+                            builder.setMessage("Email ul folosit pentru crearea unui nou cont nu a fost autorizat in prealabil de catre admin");
+                            builder.setPositiveButton("OK", null);
+                            AlertDialog dialog = builder.create();
+                            dialog.show();
+                        }
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        return isWhiteListed[0];
     }
 
     private void writeToUsersTable(final FirebaseUser firebaseUser, final User user){

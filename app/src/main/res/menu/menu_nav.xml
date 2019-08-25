@@ -23,6 +23,10 @@
                 android:id="@+id/nav_admin_categorii_iteme"
                 android:icon="@drawable/ic_baseline_dashboard"
                 android:title="Categorii si Iteme" />
+            <item
+                android:id="@+id/nav_admin_control_conturi"
+                android:icon="@drawable/ic_baseline_dashboard"
+                android:title="Control Conturi" />
         </menu>
     </item>
 

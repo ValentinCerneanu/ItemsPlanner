@@ -173,6 +173,14 @@ public class ItemsAdminPanelActivity extends AppCompatActivity {
                         break;
                     }
 
+                    case R.id.nav_admin_control_conturi: {
+                        Intent nextActivity;
+                        nextActivity = new Intent(getBaseContext(), ControlConturiActivity.class);
+                        startActivity(nextActivity);
+                        finishAffinity();
+                        break;
+                    }
+
                     case R.id.nav_logout: {
                         FirebaseAuth.getInstance().signOut();
                         Intent nextActivity = new Intent(getBaseContext(), StartActivity.class);

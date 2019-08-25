@@ -1,13 +1,17 @@
 package com.godmother.itemsplanner.activities;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -16,11 +20,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.godmother.itemsplanner.CustomAdapters.MyReservationsAdapter;
+import com.godmother.itemsplanner.CustomAdapters.ControlConturiAdminPanelAdapter;
 import com.godmother.itemsplanner.R;
-import com.godmother.itemsplanner.models.Booking;
-import com.godmother.itemsplanner.models.BookingWrapper;
-import com.godmother.itemsplanner.models.Interval;
+import com.godmother.itemsplanner.models.UserEmail;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -33,29 +36,24 @@ import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 
-public class MyItemsReservations extends AppCompatActivity {
+public class ControlConturiActivity extends AppCompatActivity {
 
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     TextView titleTextView;
     ImageButton burgerBtn;
+    FloatingActionButton addNewEmail;
 
     FirebaseDatabase database;
     DatabaseReference myRefToDatabase;
 
-    ArrayList<BookingWrapper> bookingsList = new ArrayList<BookingWrapper>();
-    MyReservationsAdapter reservationsAdapter;
+    ArrayList<UserEmail> emailList = new ArrayList<UserEmail>();
+    ControlConturiAdminPanelAdapter controlConturiAdminPanelAdapter;
 
-    JSONObject bookings;
-    JSONObject userBookigs;
-
+    JSONObject emails;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -66,32 +64,78 @@ public class MyItemsReservations extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_admin_panel);
 
         final ListView list = (ListView) findViewById(R.id.list);
-        Context context = MyItemsReservations.this;
-        reservationsAdapter = new MyReservationsAdapter(bookingsList, context);
-        list.setAdapter(reservationsAdapter);
+        Context context = ControlConturiActivity.this;
+        controlConturiAdminPanelAdapter = new ControlConturiAdminPanelAdapter(emailList, context);
+        list.setAdapter(controlConturiAdminPanelAdapter);
 
-        bookings = getAllBookings();
-
+        getUsersEmails();
         setupToolbarAndDrawer();
+
+        addNewEmail = findViewById(R.id.addBtn);
+        addNewEmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder builder = new AlertDialog.Builder((Context)ControlConturiActivity.this);
+                builder.setTitle("Email Nou");
+                final EditText input = new EditText((Context)ControlConturiActivity.this);
+                // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+                input.setInputType(InputType.TYPE_CLASS_TEXT);
+                builder.setView(input);
+
+                // Set up the buttons
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String newEmail = input.getText().toString();
+                        writeNewCategory(newEmail);
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                builder.show();
+            }
+        });
+
     }
 
-    private JSONObject getAllBookings() {
-
-        final JSONObject[] bookings = {null};
+    public void writeNewCategory(String newEmail){
         database = FirebaseDatabase.getInstance();
-        myRefToDatabase = database.getReference("Bookings");
+        myRefToDatabase = database.getReference("UsersEmail");
+        myRefToDatabase = myRefToDatabase.push();
+        myRefToDatabase.setValue(newEmail);
+    }
+
+    private void getUsersEmails() {
+        database = FirebaseDatabase.getInstance();
+        myRefToDatabase = database.getReference("UsersEmail");
         myRefToDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
+                if (dataSnapshot.exists()){
                     Gson gson = new Gson();
                     String gsonString = gson.toJson(dataSnapshot.getValue());
+                    emailList.clear();
                     try {
-                        bookings[0] = new JSONObject(gsonString);
-                        userBookigs = getItemsReservations(bookings[0]);
+                        emails = new JSONObject(gsonString);
+                        Iterator<String> iterator = emails.keys();
+                        while (iterator.hasNext()) {
+                            String key = iterator.next();
+                            try {
+                                String email = emails.get(key).toString();
+                                emailList.add(new UserEmail(email, key));
+                            } catch (JSONException e) {
+                                // Something went wrong!
+                            }
+                        }
+                        controlConturiAdminPanelAdapter.notifyDataSetChanged();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -100,72 +144,8 @@ public class MyItemsReservations extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
             }
         });
-        return bookings[0];
-    }
-
-    private JSONObject getItemsReservations(final JSONObject bookings) {
-        String userId = getUserId();
-
-        final JSONObject[] userBookings = {null};
-        database = FirebaseDatabase.getInstance();
-        myRefToDatabase = database.getReference("Users").child(userId).child("bookings");
-        myRefToDatabase.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    Gson gson = new Gson();
-                    String gsonString = gson.toJson(dataSnapshot.getValue());
-                    try {
-                        userBookings[0] = new JSONObject(gsonString);
-                        setUpListAdapter(userBookings[0], bookings);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-        return userBookings[0];
-    }
-
-    public void setUpListAdapter(JSONObject userBookigs, JSONObject bookings){
-        Iterator<String> iterator = userBookigs.keys();
-        bookingsList.clear();
-        while (iterator.hasNext()) {
-            String key = iterator.next();
-            try {
-                JSONObject bookingJSONObj = new JSONObject(bookings.get(key).toString());
-                DateFormat dateFormat = new SimpleDateFormat("yyyy MM dd");
-                try {
-                    Date from = dateFormat.parse(bookingJSONObj.getJSONObject("interval").getString("from"));
-                    Date till = dateFormat.parse(bookingJSONObj.getJSONObject("interval").getString("till"));
-                    Interval interval = new Interval(from, till);
-                    Booking booking = new Booking(bookingJSONObj.get("descriere").toString(),
-                                                  bookingJSONObj.get("user").toString(),
-                                                  bookingJSONObj.get("itemName").toString(),
-                                                  bookingJSONObj.get("itemId").toString(),
-                                                  bookingJSONObj.get("categoryId").toString(),
-                                                  bookingJSONObj.get("categoryName").toString());
-                    booking.setBookingId(key);
-                    BookingWrapper bookingWrapper = new BookingWrapper(booking, interval);
-                    bookingsList.add(bookingWrapper);
-                    //reservationsAdapter.notifyDataSetChanged();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-
-            } catch (JSONException e) {
-                // Something went wrong!
-            }
-        }
-        reservationsAdapter.notifyDataSetChanged();
     }
 
     private void setupToolbarAndDrawer(){
@@ -199,6 +179,10 @@ public class MyItemsReservations extends AppCompatActivity {
                     }
 
                     case R.id.nav_my_items_reservations: {
+                        Intent nextActivity;
+                        nextActivity = new Intent(getBaseContext(), MyItemsReservations.class);
+                        startActivity(nextActivity);
+                        finish();
                         break;
                     }
 
@@ -219,10 +203,6 @@ public class MyItemsReservations extends AppCompatActivity {
                     }
 
                     case R.id.nav_admin_control_conturi: {
-                        Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), ControlConturiActivity.class);
-                        startActivity(nextActivity);
-                        finish();
                         break;
                     }
 
@@ -253,11 +233,7 @@ public class MyItemsReservations extends AppCompatActivity {
         });
 
         titleTextView = (TextView) findViewById(R.id.barTitle);
-        titleTextView.setText("Rezervarile mele");
+        titleTextView.setText("AdminPanel\nControl Conturi");
     }
 
-    public String getUserId(){
-        SharedPreferences sharedPreferences = getSharedPreferences("FirebaseUser", MODE_PRIVATE);
-        return sharedPreferences.getString("id", null);
-    }
 }
