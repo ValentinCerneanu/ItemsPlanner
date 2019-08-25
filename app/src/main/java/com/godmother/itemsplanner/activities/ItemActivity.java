@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.text.Html;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -20,6 +21,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.NumberPicker;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -76,7 +78,9 @@ public class ItemActivity extends AppCompatActivity {
     AppCompatButton butonRezerva;
     EditText scopRezervare;
     TextView itemDescriptionTextView;
+    TextView itemCantitateTextView;
     CarouselView carouselView;
+    NumberPicker numberPicker;
 
     ArrayList<Date> intervalSelectat = new ArrayList<>();
     ArrayList<String> bookingsDetails = new ArrayList<>();
@@ -95,6 +99,10 @@ public class ItemActivity extends AppCompatActivity {
         setContentView(R.layout.activity_item);
         setupToolbarAndDrawer();
         itemDescriptionTextView = (TextView)findViewById(R.id.itemDescription);
+        itemCantitateTextView = (TextView)findViewById(R.id.itemCantitate);
+        numberPicker = findViewById(R.id.numberPicker);
+        numberPicker.setMinValue(1);
+
 
         carouselView = (CarouselView) findViewById(R.id.carouselView);
 
@@ -115,7 +123,10 @@ public class ItemActivity extends AppCompatActivity {
                             getImages();
                         getAllBookingsDetails();
                         try {
-                            itemDescriptionTextView.setText("Descriere: " + item.getString("descriere"));
+                            itemDescriptionTextView.setText(Html.fromHtml("<b>Descriere: </b>" + item.getString("descriere")));
+                            itemCantitateTextView.setText(Html.fromHtml("<b>Cantitate: </b>" + item.getInt("cantitate")));
+                            numberPicker.setMaxValue(item.getInt("cantitate"));
+                            numberPicker.setValue(item.getInt("cantitate"));
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -172,9 +183,15 @@ public class ItemActivity extends AppCompatActivity {
                     if(conflictBooking == null){
                         Date from = intervalSelectat.get(0);
                         Date till = intervalSelectat.get(intervalSelectat.size() - 1);
-                        Booking booking = new Booking(scopRezervare.getText().toString(), getUserId(),
-                                (String) getIntent().getStringExtra("ITEM_NAME"), itemId,
-                                getIntent().getStringExtra("CATEGORY_ID"), getIntent().getStringExtra("CATEGORY_NAME"));
+                        Booking booking = new Booking(
+                                scopRezervare.getText().toString(),
+                                getUserId(),
+                                (String) getIntent().getStringExtra("ITEM_NAME"),
+                                itemId,
+                                getIntent().getStringExtra("CATEGORY_ID"),
+                                getIntent().getStringExtra("CATEGORY_NAME"),
+                                numberPicker.getValue());
+
                         Interval interval = new Interval(from, till);
                         writeNewBooking(booking, interval);
                     } else {

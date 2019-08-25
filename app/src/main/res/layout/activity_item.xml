@@ -66,6 +66,15 @@
                     android:gravity="center">
                 </TextView>
 
+                <TextView
+                    android:id="@+id/itemCantitate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:textSize="18dp"
+                    android:gravity="center">
+                </TextView>
+
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -78,6 +87,21 @@
                         android:hint="Scop rezervare"
                         android:imeOptions="actionUnspecified"/>
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/cantitate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Alege cantitate:"
+                    android:layout_gravity="center"
+                    android:textSize="18sp"/>
+
+                <NumberPicker
+                    android:id="@+id/numberPicker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="5dp"/>
 
                 <ScrollView
                     android:id="@+id/childScroll"

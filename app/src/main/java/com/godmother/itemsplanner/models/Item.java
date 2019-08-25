@@ -6,11 +6,13 @@ public class Item implements Serializable {
     private String id;
     private String name;
     private String descriere;
+    private int cantitate;
 
-    public Item(String id, String name, String descriere){
+    public Item(String id, String name, String descriere, int cantitate){
         this.id = id;
         this.name = name;
         this.descriere = descriere;
+        this.cantitate = cantitate;
     }
 
     public String getId() {
@@ -35,6 +37,14 @@ public class Item implements Serializable {
 
     public void setDescriere(String descriere) {
         this.descriere = descriere;
+    }
+
+    public int getCantitate() {
+        return cantitate;
+    }
+
+    public void setCantitate(int cantitate) {
+        this.cantitate = cantitate;
     }
 
     @Override

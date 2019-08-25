@@ -34,56 +34,86 @@
 
         </androidx.appcompat.widget.Toolbar>
 
-        <com.google.android.material.textfield.TextInputLayout
+        <ScrollView
+            android:id="@+id/scroll"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="10dp">
-            <EditText android:id="@+id/item_name"
+            android:background="#fff"
+            android:focusableInTouchMode="false">
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textCapWords"
-                android:hint="Nume Item" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:orientation="vertical">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="10dp">
-            <EditText android:id="@+id/descriere_item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textCapWords"
-                android:hint="Descriere Item" />
-        </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="10dp">
+                    <EditText android:id="@+id/item_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapWords"
+                        android:hint="Nume Item" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/upload_image"
-            android:layout_width="fill_parent"
-            android:layout_height="50dp"
-            android:layout_marginTop="10dp"
-            android:text="Alege poze" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="10dp">
+                    <EditText android:id="@+id/descriere_item"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapWords|textMultiLine"
+                        android:hint="Descriere Item" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-        <com.synnapps.carouselview.CarouselView
-            android:id="@+id/carouselViewAdminPanel"
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-            app:fillColor="#FFFFFFFF"
-            app:pageColor="#00000000"
-            app:radius="6dp"
-            app:slideInterval="3000"
-            app:strokeColor="#FF777777"
-            app:strokeWidth="1dp"/>
+                <TextView
+                    android:id="@+id/text_id"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cantitate:"
+                    android:layout_gravity="center"
+                    android:textSize="18sp"/>
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/add_new_item"
-            android:layout_width="fill_parent"
-            android:layout_height="50dp"
-            android:layout_marginTop="10dp"
-            android:text="Adauga item" />
+                <NumberPicker
+                    android:id="@+id/numberPicker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="5dp"/>
 
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/upload_image"
+                    android:layout_width="fill_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="5dp"
+                    android:text="Alege poze" />
+
+                <com.synnapps.carouselview.CarouselView
+                    android:id="@+id/carouselViewAdminPanel"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    app:fillColor="#FFFFFFFF"
+                    app:pageColor="#00000000"
+                    app:radius="6dp"
+                    app:slideInterval="3000"
+                    app:strokeColor="#FF777777"
+                    app:strokeWidth="1dp"/>
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/add_new_item"
+                    android:layout_width="fill_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="5dp"
+                    android:text="Adauga item" />
+
+            </LinearLayout>
+        </ScrollView>
     </LinearLayout>
+
     <com.google.android.material.navigation.NavigationView
         android:layout_width="wrap_content"
         android:layout_height="match_parent"

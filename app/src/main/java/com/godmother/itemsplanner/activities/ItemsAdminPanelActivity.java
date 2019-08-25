@@ -101,7 +101,8 @@ public class ItemsAdminPanelActivity extends AppCompatActivity {
                             try {
                                 JSONObject item = new JSONObject(items.get(key).toString());
                                 itemsList.add(new Item(key, item.get("name").toString(),
-                                        item.get("descriere").toString()));
+                                        item.get("descriere").toString(),
+                                        item.getInt("cantitate")));
                             } catch (JSONException e) {
                                 // Something went wrong!
                             }

@@ -10,14 +10,16 @@ public class Booking {
     private String categoryId;
     private String categoryName;
     private String userName;
+    private int cantitate;
 
-    public Booking(String descriere, String user, String itemName, String itemId, String categoryId, String categoryName) {
+    public Booking(String descriere, String user, String itemName, String itemId, String categoryId, String categoryName, int cantitate) {
         this.descriere = descriere;
         this.user = user;
         this.itemName = itemName;
         this.itemId = itemId;
         this.categoryId = categoryId;
         this.categoryName = categoryName;
+        this.cantitate = cantitate;
     }
 
     public String getCategoryName() {
@@ -84,18 +86,26 @@ public class Booking {
         this.descriere = descriere;
     }
 
+    public int getCantitate() {
+        return cantitate;
+    }
+
+    public void setCantitate(int cantitate) {
+        this.cantitate = cantitate;
+    }
+
     @Override
     public String toString() {
         if(userName == null){
-            return itemName + "\n" + descriere;
+            return "Item: " + itemName + "\n" + "Scop rezervare: " + descriere + "\n" + "Cantitate: " + cantitate;
         }
-        return itemName + "\n" + descriere + "\n" + userName;
+        return "Item: " + itemName + "\n" + "Scop rezervare: " + descriere + "\n" + "Cantitate: " + cantitate + "\n" + "User: " + userName;
     }
 
     public String toEmail() {
         if(userName == null){
-            return itemName + "<br />" + descriere;
+            return "Item: " + itemName + "<br />" + "Scop rezervare: " + descriere + "<br />" + "Cantitate: " + cantitate;
         }
-        return itemName + "<br />" + descriere + "<br />" + userName;
+        return "Item: " + itemName + "<br />" + "Scop rezervare: " + descriere + "<br />" + "Cantitate: " + cantitate + "<br />" + "User: " + userName;
     }
 }

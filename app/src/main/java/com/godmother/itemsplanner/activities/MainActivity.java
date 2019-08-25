@@ -183,7 +183,9 @@ public class MainActivity extends AppCompatActivity {
                         JSONObject item = new JSONObject(items.get(key).toString());
                         SearchedItem itemForSearch = new SearchedItem(key, item.get("name").toString(),
                                                             item.get("descriere").toString(),
-                                                            keyCategory, category.getString("name"));
+                                                            item.getInt("cantitate"),
+                                                            keyCategory,
+                                                            category.getString("name"));
                         allItemsForSearch.add(itemForSearch);
                     } catch (JSONException e) {
                         e.printStackTrace();

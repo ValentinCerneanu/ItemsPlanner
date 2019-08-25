@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +30,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.godmother.itemsplanner.R;
 import com.godmother.itemsplanner.models.Image;
 import com.godmother.itemsplanner.models.ImageUpload;
+import com.godmother.itemsplanner.models.Item;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -59,6 +61,7 @@ public class AddNewItemActivity extends AppCompatActivity {
     EditText numeItem;
     EditText descriereItem;
     CarouselView carouselView;
+    NumberPicker numberPicker;
 
     FirebaseStorage storage;
     StorageReference storageReference;
@@ -113,6 +116,10 @@ public class AddNewItemActivity extends AppCompatActivity {
         imageUploads.add(imageUpload);
         carouselView.setImageListener(imageListener);
         carouselView.setPageCount(imageUploads.size());
+
+        numberPicker = findViewById(R.id.numberPicker);
+        numberPicker.setMinValue(1);
+        numberPicker.setMaxValue(1000);
 
     }
     ImageClickListener imageClickListener = new ImageClickListener() {
@@ -224,6 +231,7 @@ public class AddNewItemActivity extends AppCompatActivity {
         myRefToDatabase = database.getReference("Categories");
         myRefToDatabase.child(categoryId).child("items").child(itemGeneratedId).child("name").setValue(numeItem.getText().toString());
         myRefToDatabase.child(categoryId).child("items").child(itemGeneratedId).child("descriere").setValue(descriereItem.getText().toString());
+        myRefToDatabase.child(categoryId).child("items").child(itemGeneratedId).child("cantitate").setValue(numberPicker.getValue());
         return itemGeneratedId;
     }
 
@@ -233,7 +241,6 @@ public class AddNewItemActivity extends AppCompatActivity {
         String imageGeneratedId = myRefToDatabase.getKey();
         myRefToDatabase = database.getReference("Categories");
         myRefToDatabase.child(categoryId).child("items").child(itemGeneratedId).child("images").child(imageGeneratedId).setValue(image);
-
     }
 
     private void uploadImages() {

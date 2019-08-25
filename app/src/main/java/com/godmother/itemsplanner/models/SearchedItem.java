@@ -5,8 +5,8 @@ public class SearchedItem extends Item {
     private String categoryId;
     private String categoryName;
 
-    public SearchedItem(String id, String name, String descriere, String categoryId, String categoryName){
-        super(id, name, descriere);
+    public SearchedItem(String id, String name, String descriere, int cantitate, String categoryId, String categoryName){
+        super(id, name, descriere, cantitate);
         this.categoryId = categoryId;
         this.categoryName = categoryName;
     }

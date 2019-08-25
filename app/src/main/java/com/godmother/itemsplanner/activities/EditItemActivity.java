@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -69,6 +70,7 @@ public class EditItemActivity  extends AppCompatActivity {
     EditText numeItem;
     EditText descriereItem;
     CarouselView carouselView;
+    NumberPicker numberPicker;
 
     FirebaseStorage storage;
     StorageReference storageReference;
@@ -122,6 +124,10 @@ public class EditItemActivity  extends AppCompatActivity {
         categoryId = getIntent().getStringExtra("CATEGORY_ID");
         itemId = getIntent().getStringExtra("ITEM_ID");
 
+        numberPicker = findViewById(R.id.numberPicker);
+        numberPicker.setMinValue(1);
+        numberPicker.setMaxValue(1000);
+
         myRefToDatabase = database.getReference("Categories").child(categoryId).child("items").child(itemId);
         myRefToDatabase.addValueEventListener(new ValueEventListener() {
             @Override
@@ -135,6 +141,7 @@ public class EditItemActivity  extends AppCompatActivity {
                         try {
                             numeItem.setText(item.getString("name"));
                             descriereItem.setText(item.getString("descriere"));
+                            numberPicker.setValue(item.getInt("cantitate"));
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -317,6 +324,7 @@ public class EditItemActivity  extends AppCompatActivity {
         myRefToDatabase = database.getReference("Categories");
         myRefToDatabase.child(categoryId).child("items").child(itemId).child("name").setValue(numeItem.getText().toString());
         myRefToDatabase.child(categoryId).child("items").child(itemId).child("descriere").setValue(descriereItem.getText().toString());
+        myRefToDatabase.child(categoryId).child("items").child(itemId).child("cantitate").setValue(numberPicker.getValue());
     }
 
     private void writeImageInfoToDatabase(Image image, String itemGeneratedId){
