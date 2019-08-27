@@ -65,7 +65,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import static com.squareup.timessquare.CalendarPickerView.SelectionMode.RANGE;
 
@@ -179,8 +181,8 @@ public class ItemActivity extends AppCompatActivity {
                     focusView.requestFocus();
                 } else {
                     intervalSelectat = new ArrayList<Date>(calendar.getSelectedDates());
-                    String conflictBooking = checkAvailability();
-                    if(conflictBooking == null){
+                    final ArrayList<String> conflictBookings = checkAvailability();
+                    if(conflictBookings == null){
                         Date from = intervalSelectat.get(0);
                         Date till = intervalSelectat.get(intervalSelectat.size() - 1);
                         Booking booking = new Booking(
@@ -195,51 +197,60 @@ public class ItemActivity extends AppCompatActivity {
                         Interval interval = new Interval(from, till);
                         writeNewBooking(booking, interval);
                     } else {
-                        try {
-                            final JSONObject detailsConflictBooking = new JSONObject(conflictBooking);
-
-                            database = FirebaseDatabase.getInstance();
-                            myRefToDatabase = database.getReference("Users").child(detailsConflictBooking.get("user").toString());
-                            myRefToDatabase.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                    if (dataSnapshot.exists()) {
-                                        Gson gson = new Gson();
-                                        String gsonString = gson.toJson(dataSnapshot.getValue());
-                                        try {
-                                            JSONObject user = new JSONObject(gsonString);
-                                            try {
-                                                AlertDialog.Builder builder = new AlertDialog.Builder((Context)ItemActivity.this);
-                                                builder.setTitle("Suprapunere rezervari");
-                                                builder.setMessage("Itemul este deja rezervat pentru intervalul dorit cu descrierea " + detailsConflictBooking.get("descriere")
-                                                                    + " de catre colegul " + user.get("name")
-                                                                    + " cu numarul de telefon " + user.get("phoneNumber")
-                                                                    + "! \nRezervarea a esuat! "   );
-                                                builder.setPositiveButton("OK", null);
-                                                AlertDialog dialog = builder.create();
-                                                dialog.show();
-                                            } catch (JSONException e) {
-                                                e.printStackTrace();
-                                            }
-                                            getAllBookingsDetails();
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
+                        database = FirebaseDatabase.getInstance();
+                        DatabaseReference myRefToDatabaseToUsers = database.getReference("Users");
+                        myRefToDatabaseToUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                if (dataSnapshot.exists()) {
+                                    Gson gson = new Gson();
+                                    String gsonString = gson.toJson(dataSnapshot.getValue());
+                                    try {
+                                        JSONObject users = new JSONObject(gsonString);
+                                        createDialogSuprapunereRezervari(conflictBookings, users);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
                                     }
                                 }
+                            }
 
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError) {
-                                }
-                            });
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                            }
+                        });
 
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
                     }
                 }
             }
         });
+    }
+
+    private void createDialogSuprapunereRezervari(ArrayList<String> conflictBookings, JSONObject users) {
+        String dialogContent = new String();
+        try {
+            for(String conflictBooking: conflictBookings) {
+
+                final JSONObject detailsConflictBooking = new JSONObject(conflictBooking);
+                database = FirebaseDatabase.getInstance();
+                JSONObject user = users.getJSONObject(detailsConflictBooking.get("user").toString());
+
+                dialogContent = dialogContent + "Scop: " + detailsConflictBooking.get("descriere") + "\n"
+                        + "Cantitate: " + detailsConflictBooking.get("cantitate") + "\n"
+                        + "User: " + user.get("name") + "\n"
+                        + "Tel: "  + user.get("phoneNumber") + "\n\n";
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder((Context) ItemActivity.this);
+        builder.setTitle("Suprapunere rezervari");
+        builder.setMessage("Itemul este deja rezervat pentru intervalul dorit \n" + dialogContent
+                + "\nRezervarea a esuat! ");
+        builder.setPositiveButton("OK", null);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        getAllBookingsDetails();
     }
 
     ImageListener imageListener = new ImageListener() {
@@ -356,30 +367,57 @@ public class ItemActivity extends AppCompatActivity {
         myRefToDatabase.child(getUserId()).child("bookings").child(generatedId).setValue(generatedId);
     }
 
-    public String checkAvailability() {
-        for(String bookingDetails: bookingsDetails){
-            try {
-                JSONObject details = new JSONObject(bookingDetails);
-                JSONObject interval = details.getJSONObject("interval");
-                DateFormat dateFormat = new SimpleDateFormat("yyyy MM dd");
-                Date from = dateFormat.parse(interval.getString("from"));
-                Date till = dateFormat.parse(interval.getString("till"));
-                Date intervalSelectatFrom = intervalSelectat.get(0);
-                Date intervalSelectatTill = intervalSelectat.get(intervalSelectat.size() - 1);
+    public ArrayList<String> checkAvailability() {
+        Map<Long, Integer> frecventa = new HashMap<Long, Integer>();
+        ArrayList<String> bookingDetailsConflict = new ArrayList<>();
+        Date intervalSelectatFrom = null;
+        Date intervalSelectatTill = null;
+        try {
+            for(String bookingDetails: bookingsDetails){
 
-                if(!(till.before(intervalSelectatFrom) || intervalSelectatTill.before(from)))
-                    return bookingDetails;
+                    JSONObject details = new JSONObject(bookingDetails);
+                    JSONObject interval = details.getJSONObject("interval");
+                    DateFormat dateFormat = new SimpleDateFormat("yyyy MM dd");
+                    Date from = dateFormat.parse(interval.getString("from"));
+                    Date till = dateFormat.parse(interval.getString("till"));
+                    intervalSelectatFrom = intervalSelectat.get(0);
+                    intervalSelectatTill = intervalSelectat.get(intervalSelectat.size() - 1);
 
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (ParseException e) {
-                e.printStackTrace();
+                    if(!(till.before(intervalSelectatFrom) || intervalSelectatTill.before(from))) {
+                        bookingDetailsConflict.add(bookingDetails);
+
+                        do {
+                            if (frecventa.containsKey(from.getTime())) {
+                                int oldValue = frecventa.get(from.getTime());
+                                frecventa.put(from.getTime(), oldValue + details.getInt("cantitate"));
+                            } else {
+                                frecventa.put(from.getTime(), details.getInt("cantitate"));
+                            }
+
+                            Calendar cal = Calendar.getInstance();
+                            cal.setTime(from);
+                            cal.add(Calendar.DATE, 1); //minus number would decrement the days
+                            from = cal.getTime();
+                        } while(from.before(till));
+                    }
+
             }
+            for (Map.Entry<Long, Integer> entry : frecventa.entrySet()) {
+                if(entry.getKey() >= intervalSelectatFrom.getTime() && entry.getKey() <= intervalSelectatTill.getTime())
+                    if(entry.getValue() + numberPicker.getValue() > item.getInt("cantitate")){
+                        return bookingDetailsConflict;
+                    }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
         return null;
     }
 
     public void getAllBookingsDetails(){
+        bookingsDetails.clear();
         if(item.has("bookings")) {
             try {
                 final JSONObject itemBookings = item.getJSONObject("bookings");
