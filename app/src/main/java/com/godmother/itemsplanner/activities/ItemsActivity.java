@@ -25,6 +25,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 
 public class ItemsActivity extends AppCompatActivity {
@@ -62,6 +63,11 @@ public class ItemsActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
+                adapter.sort(new Comparator<Item>() {
+                    public int compare(Item arg0, Item arg1) {
+                        return arg0.getName().compareTo(arg1.getName());
+                    }
+                });
                 adapter.notifyDataSetChanged();
             } catch (JSONException e) {
                 e.printStackTrace();

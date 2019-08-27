@@ -33,6 +33,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 
 public class ItemsAdminPanelActivity extends AppCompatActivity {
@@ -107,6 +109,13 @@ public class ItemsAdminPanelActivity extends AppCompatActivity {
                                 // Something went wrong!
                             }
                         }
+                        Collections.sort(itemsList, new Comparator<Item>() {
+                            @Override
+                            public int compare(Item arg0, Item arg1) {
+                                return arg0.getName().compareTo(arg1.getName());
+                            }
+                        });
+
                         itemsAdminPanelAdapter.notifyDataSetChanged();
                     } catch (JSONException e) {
                         e.printStackTrace();
