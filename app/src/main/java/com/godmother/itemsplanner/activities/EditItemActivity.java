@@ -66,7 +66,7 @@ public class EditItemActivity  extends AppCompatActivity {
     TextView titleTextView;
     ImageButton burgerBtn;
     Button choosePhoto;
-    Button newItem;
+    Button editItem;
     EditText numeItem;
     EditText descriereItem;
     CarouselView carouselView;
@@ -105,11 +105,12 @@ public class EditItemActivity  extends AppCompatActivity {
         carouselView = (CarouselView) findViewById(R.id.carouselViewAdminPanel);
         carouselView.setImageClickListener(imageClickListener);
 
-        newItem = findViewById(R.id.add_new_item);
-        newItem.setOnClickListener(new View.OnClickListener() {
+        editItem = findViewById(R.id.add_new_item);
+        editItem.setText("EDITEAZA ITEM");
+        editItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addNewItem();
+                editItem();
             }
         });
 
@@ -296,7 +297,7 @@ public class EditItemActivity  extends AppCompatActivity {
         }
     };
 
-    private void addNewItem(){
+    private void editItem(){
         boolean cancel = false;
         View focusView = null;
         if (TextUtils.isEmpty(numeItem.getText().toString())) {
