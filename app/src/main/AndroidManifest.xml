@@ -14,6 +14,7 @@
         android:theme="@style/AppTheme.NoActionBar">
         <activity
             android:name="com.godmother.itemsplanner.activities.StartActivity"
+            android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
