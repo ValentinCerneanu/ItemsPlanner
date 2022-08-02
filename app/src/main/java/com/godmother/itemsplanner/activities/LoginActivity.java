@@ -66,7 +66,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         setContentView(R.layout.activity_login);
 
         privacyPolicyTextView = (TextView)findViewById(R.id.privacy_policy);
-        Spanned text = Html.fromHtml("<a href='https://godmother-itemsplann.flycricket.io/privacy.html'>Privacy Policy</a>");
+        Spanned text = Html.fromHtml("<a href='https://pages.flycricket.io/itemsplanner/privacy.html'>Privacy Policy</a>");
         privacyPolicyTextView.setMovementMethod(LinkMovementMethod.getInstance());
         privacyPolicyTextView.setText(text);
 
