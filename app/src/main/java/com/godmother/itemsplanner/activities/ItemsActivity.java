@@ -125,57 +125,50 @@ public class ItemsActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(MenuItem menuItem) {
                 //Closing drawer on item click
                 drawerLayout.closeDrawers();
-                switch (menuItem.getItemId()) {
-                    case R.id.nav_home: {
-                        Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), MainActivity.class);
-                        startActivity(nextActivity);
-                        finishAffinity();
-                        break;
-                    }
-
-                    case R.id.nav_my_items_reservations: {
-                        Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), MyItemsReservations.class);
-                        startActivity(nextActivity);
-                        finishAffinity();
-                        break;
-                    }
-
-                    case R.id.nav_admin_toate_rezervarile: {
-                        Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), AllBookingsAdminPanelActivity.class);
-                        startActivity(nextActivity);
-                        finishAffinity();
-                        break;
-                    }
-
-                    case R.id.nav_admin_categorii_iteme: {
-                        Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), CategoriesAdminPanelActivity.class);
-                        startActivity(nextActivity);
-                        finishAffinity();
-                        break;
-                    }
-
-                    case R.id.nav_admin_control_conturi: {
-                        Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), ControlConturiActivity.class);
-                        startActivity(nextActivity);
-                        finishAffinity();
-                        break;
-                    }
-
-                    case R.id.nav_logout: {
-                        FirebaseAuth.getInstance().signOut();
-                        Intent nextActivity = new Intent(getBaseContext(), StartActivity.class);
-                        nextActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(nextActivity);
-                        finishAffinity();
-                    }
-                    return true;
+                int id = menuItem.getItemId();
+                if(id ==  R.id.nav_home) {
+                    Intent nextActivity;
+                    nextActivity = new Intent(getBaseContext(), MainActivity.class);
+                    startActivity(nextActivity);
+                    finishAffinity();
                 }
-                return false;
+
+                if(id == R.id.nav_my_items_reservations) {
+                    Intent nextActivity;
+                    nextActivity = new Intent(getBaseContext(), MyItemsReservations.class);
+                    startActivity(nextActivity);
+                    finishAffinity();
+                }
+
+                if(id == R.id.nav_admin_toate_rezervarile) {
+                    Intent nextActivity;
+                    nextActivity = new Intent(getBaseContext(), AllBookingsAdminPanelActivity.class);
+                    startActivity(nextActivity);
+                    finishAffinity();
+                }
+
+                if(id == R.id.nav_admin_categorii_iteme) {
+                    Intent nextActivity;
+                    nextActivity = new Intent(getBaseContext(), CategoriesAdminPanelActivity.class);
+                    startActivity(nextActivity);
+                    finishAffinity();
+                }
+
+                if(id ==  R.id.nav_admin_control_conturi) {
+                    Intent nextActivity;
+                    nextActivity = new Intent(getBaseContext(), ControlConturiActivity.class);
+                    startActivity(nextActivity);
+                    finishAffinity();
+                }
+
+                if(id == R.id.nav_logout) {
+                    FirebaseAuth.getInstance().signOut();
+                    Intent nextActivity = new Intent(getBaseContext(), StartActivity.class);
+                    nextActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(nextActivity);
+                    finishAffinity();
+                }
+                return true;
             }
         });
 

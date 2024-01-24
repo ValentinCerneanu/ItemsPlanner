@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1008227981569",
+    "firebase_url": "https://items-planner.firebaseio.com",
+    "project_id": "items-planner",
+    "storage_bucket": "items-planner.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1008227981569:android:b4609696ff605519",
+        "android_client_info": {
+          "package_name": "com.godmother.itemsplanner2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1008227981569-ai5k9hlc8iqa6uhvk1hm8929bnao1p8p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJMqDU85C6xPhGVXYzFLGJkAVVu2gWrgk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1008227981569-ai5k9hlc8iqa6uhvk1hm8929bnao1p8p.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1008227981569-bct6loejscmfo3rkjvfoltqlvmc4ktmg.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "alexorgid.play"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

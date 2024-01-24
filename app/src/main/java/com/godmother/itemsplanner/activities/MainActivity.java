@@ -286,49 +286,43 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(MenuItem menuItem) {
                 //Closing drawer on item click
                 drawerLayout.closeDrawers();
-                switch (menuItem.getItemId()) {
-                    case R.id.nav_home: {
-                        break;
-                    }
+                int id = menuItem.getItemId();
+                if(id ==  R.id.nav_home) {
 
-                    case R.id.nav_my_items_reservations: {
-                        Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), MyItemsReservations.class);
-                        startActivity(nextActivity);
-                        break;
-                    }
-
-                    case R.id.nav_admin_toate_rezervarile: {
-                        Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), AllBookingsAdminPanelActivity.class);
-                        startActivity(nextActivity);
-                        break;
-                    }
-
-                    case R.id.nav_admin_categorii_iteme: {
-                        Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), CategoriesAdminPanelActivity.class);
-                        startActivity(nextActivity);
-                        break;
-                    }
-
-                    case R.id.nav_admin_control_conturi: {
-                        Intent nextActivity;
-                        nextActivity = new Intent(getBaseContext(), ControlConturiActivity.class);
-                        startActivity(nextActivity);
-                        break;
-                    }
-
-                    case R.id.nav_logout: {
-                        FirebaseAuth.getInstance().signOut();
-                        Intent nextActivity = new Intent(getBaseContext(), StartActivity.class);
-                        nextActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(nextActivity);
-                        finishAffinity();
-                    }
-                    return true;
                 }
-                return false;
+
+                if(id == R.id.nav_my_items_reservations) {
+                    Intent nextActivity;
+                    nextActivity = new Intent(getBaseContext(), MyItemsReservations.class);
+                    startActivity(nextActivity);
+                }
+
+                if(id == R.id.nav_admin_toate_rezervarile) {
+                    Intent nextActivity;
+                    nextActivity = new Intent(getBaseContext(), AllBookingsAdminPanelActivity.class);
+                    startActivity(nextActivity);
+                }
+
+                if(id == R.id.nav_admin_categorii_iteme) {
+                    Intent nextActivity;
+                    nextActivity = new Intent(getBaseContext(), CategoriesAdminPanelActivity.class);
+                    startActivity(nextActivity);
+                }
+
+                if(id ==  R.id.nav_admin_control_conturi) {
+                    Intent nextActivity;
+                    nextActivity = new Intent(getBaseContext(), ControlConturiActivity.class);
+                    startActivity(nextActivity);
+                }
+
+                if(id == R.id.nav_logout) {
+                    FirebaseAuth.getInstance().signOut();
+                    Intent nextActivity = new Intent(getBaseContext(), StartActivity.class);
+                    nextActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(nextActivity);
+                    finishAffinity();
+                }
+                return true;
             }
         });
 
