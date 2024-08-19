@@ -50,8 +50,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 import com.squareup.timessquare.CalendarPickerView;
-import com.synnapps.carouselview.CarouselView;
-import com.synnapps.carouselview.ImageListener;
+import you.thiago.carouselview.CarouselView;
+import you.thiago.carouselview.ImageListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;

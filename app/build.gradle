@@ -6,14 +6,14 @@ plugins {
 }
 
 android {
-    compileSdk 34
+    compileSdk 35
     namespace "com.godmother.itemsplanner"
     defaultConfig {
         applicationId "com.godmother.itemsplanner2"
         minSdkVersion 24
-        targetSdkVersion 34
-        versionCode 12
-        versionName "1.400"
+        targetSdkVersion 35
+        versionCode 15
+        versionName "1.500"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -45,6 +45,6 @@ dependencies {
     implementation 'androidx.navigation:navigation-runtime:2.7.6'
     implementation 'com.squareup:android-times-square:1.6.5@aar'
     implementation 'joda-time:joda-time:2.9.8'
-    implementation 'com.synnapps:carouselview:0.1.5'
+    implementation 'com.github.thiago-you:carouselview:1.0.0'
 }
 apply plugin: 'com.google.gms.google-services'

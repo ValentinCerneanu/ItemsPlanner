@@ -42,9 +42,9 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.synnapps.carouselview.CarouselView;
-import com.synnapps.carouselview.ImageClickListener;
-import com.synnapps.carouselview.ImageListener;
+import you.thiago.carouselview.CarouselView;
+import you.thiago.carouselview.ImageClickListener;
+import you.thiago.carouselview.ImageListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

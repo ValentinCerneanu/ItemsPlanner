@@ -46,9 +46,9 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
-import com.synnapps.carouselview.CarouselView;
-import com.synnapps.carouselview.ImageClickListener;
-import com.synnapps.carouselview.ImageListener;
+import you.thiago.carouselview.CarouselView;
+import you.thiago.carouselview.ImageClickListener;
+import you.thiago.carouselview.ImageListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
