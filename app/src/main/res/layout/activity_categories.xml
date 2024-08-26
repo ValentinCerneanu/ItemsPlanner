@@ -70,7 +70,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="Copyright (c) SmartTech 2019" />
+                android:text="Copyright (c) MobileProDev 2024" />
         </LinearLayout>
     </com.google.android.material.navigation.NavigationView>
 
