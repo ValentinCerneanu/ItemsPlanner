@@ -6,14 +6,14 @@ plugins {
 }
 
 android {
-    compileSdk 36
+    compileSdk 37
     namespace "com.godmother.itemsplanner"
     defaultConfig {
         applicationId "com.godmother.itemsplanner2"
         minSdkVersion 24
-        targetSdkVersion 36
-        versionCode 19
-        versionName "1.8"
+        targetSdkVersion 37
+        versionCode 21
+        versionName "1.10"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
